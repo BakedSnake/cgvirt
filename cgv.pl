@@ -49,13 +49,17 @@ sub prepare {
 sub configure {
     if ($vm_image_choice) {
         if ($vm_image_choice == 1) {
-            $vm_os = "ubuntu24.04";
-        } elsif ($vm_image_choice == 2) {
             $vm_os = "debian13";
-        } elsif ($vm_image_choice == 3) {
-            $vm_os = "opensuse16.0";
-        } else {
+        } elsif ($vm_image_choice == 2) {
             $vm_os = "gentoo";
+        } elsif ($vm_image_choice == 3) {
+            $vm_os = "gentoo";
+        } elsif ($vm_image_choice == 4) {
+            $vm_os = "opensuse16.0";
+        } elsif ($vm_image_choice == 5) {
+            $vm_os = "ubuntu24.04";
+        } else {
+            $vm_os = "ubuntu20.04";
         }
     } else {
         print(STDERR "OS image not specified!\n");
@@ -113,13 +117,14 @@ sub create_vm_disk {
     if ($interactive or $disksize eq "") {
         $disksize = <STDIN>;
         chomp $disksize;
-    } else { print(STDOUT "  $disksize"."G\n"); }
+    } else { print(STDOUT "$disksize"."G\n"); }
     $disksize = $disksize."G";
     
+    print(STDOUT ">>> Resizing disk.\n");
     open QEMU, "qemu-img create -b os_img.qcow2 -f qcow2 -F qcow2 \"$diskname\" $disksize |" or die "$!";
     while (my $line= <QEMU>) {
         my @diskopts = split(" ", $line);
-        print(STDOUT "$diskopts[0] $diskopts[1]\n");
+        print(STDOUT " $diskopts[0] $diskopts[1]\n");
         shift(@diskopts);
         shift(@diskopts);
         foreach my $diskopt (@diskopts) {
@@ -148,7 +153,7 @@ sub create_virtual_machine {
     
     open VIRT, $virt_str or die "$!";
     while (my $line= <VIRT>) {
-        print(STDOUT "  $line");
+        print(STDOUT "$line");
     }
     close VIRT;
 }
@@ -161,9 +166,9 @@ sub get_ip_address {
         open IP, "$dosu virsh domifaddr $vm_name |" or die "$!";
         while (my $line = <IP>) {
             if ($line =~ m/ipv4/) {
-                print(STDOUT "   Name     MAC address         Protocol   Address\n");
-                print(STDOUT "  -------------------------------------------------------------\n");
-                print(STDOUT "  $line\n");
+                print(STDOUT " Name     MAC address         Protocol   Address\n");
+                print(STDOUT "-------------------------------------------------------------\n");
+                print(STDOUT "$line\n");
                 $found = 1;
             }
         }

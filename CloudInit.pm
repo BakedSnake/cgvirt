@@ -46,7 +46,7 @@ ssh_pwauth: True
 sub create_cidata {
     open ISO, "mkisofs -output cidata.iso -V cidata -r -J user-data meta-data |" or die "$!";
     while (my $line= <ISO>) {
-        print STDOUT "$line";
+        print STDOUT "  $line";
     }
     close ISO;
 }

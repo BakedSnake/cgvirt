@@ -20,7 +20,7 @@ sub select_image {
     );
 
     print(STDOUT "\n>>> Choose OS:\n");
-    printf(STDOUT " 1. Ubuntu\n 2. Debian\n 3. OpenSuse\n 4. Gentoo ( arm64 )\n 5. Gentoo ( amd64 )\n\nYour answer: ");
+    printf(STDOUT "  1. Ubuntu\n  2. Debian\n  3. OpenSuse\n  4. Gentoo ( arm64 )\n  5. Gentoo ( amd64 )\n\nYour answer: ");
     if ($interactive or $os_choice eq "") {
         $os_choice = 2;
         $os_choice = <STDIN>;
@@ -28,15 +28,15 @@ sub select_image {
     } else { print(STDOUT "$os_choice\n"); }
 
     if ($os_choice == "1") {
-        print(STDOUT "\nDownloading:\n Ubuntu\n  - $os_img_urls{1}\n\n");
+        print(STDOUT "\nDownloading:\n  Ubuntu\n  - $os_img_urls{1}\n\n");
     } elsif ($os_choice == "2") {
-        print(STDOUT "\nDownloading:\n Debian\n  - $os_img_urls{2}\n\n");
+        print(STDOUT "\nDownloading:\n  Debian\n  - $os_img_urls{2}\n\n");
     } elsif ($os_choice == "3") {
-        print(STDOUT "\nDownloading:\n OpenSuse\n  - $os_img_urls{3}\n\n");
+        print(STDOUT "\nDownloading:\n  OpenSuse\n  - $os_img_urls{3}\n\n");
     } elsif ($os_choice == "4") {
-        print(STDOUT "\nDownloading:\n OpenSuse\n  - $os_img_urls{4}\n\n");
+        print(STDOUT "\nDownloading:\n  Gentoo ( arm64 )\n  - $os_img_urls{4}\n\n");
     } else {
-        print(STDOUT "\nDownloading:\n OpenSuse\n  - $os_img_urls{5}\n\n");
+        print(STDOUT "\nDownloading:\n  Gentoo ( amd64 )\n  - $os_img_urls{5}\n\n");
     }
 
     return ($os_choice, %os_img_urls);
@@ -66,7 +66,7 @@ sub get_disk_image {
         print(IMG "$res");
         close IMG;
     } else {
-        print(STDERR "An error happened: $ret ".$curl->strerror($ret)." ".$curl->errbuf."\n");
+        print(STDERR ">>> An error happened: $ret ".$curl->strerror($ret)." ".$curl->errbuf."\n");
     }
 }
 

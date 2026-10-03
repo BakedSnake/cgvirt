@@ -19,7 +19,7 @@ my $config_file = $VMConfig::config_file;
 my $uid;
 my $gid;
 my $vm_env;
-my $vm_name = "";
+my $vm_name;
 my $vm_os;
 my $vm_image_choice = 1;
 my %vm_image_urls;
@@ -30,31 +30,36 @@ my $ssh_key;
 
 my $dosu;
 my $interactive;
+my $debug;
 
 my $create;
 my $delete;
 
 sub prepare {
-    print(STDOUT ">>> Configuration\n");
-    print(STDOUT "OS: $os_release\n");
-    print(STDOUT "USER: $username\n");
-    print(STDOUT "CONFIG: $config_file\n\n");
+    if ($debug) {
+        print(STDOUT ">>> Configuration\n");
+        print(STDOUT "OS: $os_release\n");
+        print(STDOUT "USER: $username\n");
+        print(STDOUT "CONFIG: $config_file\n\n");
+    }
     
     VMConfig::parse_config();
-    while (my ($key, $val) = each %VMConfig::virtual_machine) {
-        print(STDOUT "$key => $val\n");
-    }
 }
 
 sub configure {
-    if ($vm_image_choice == 1) {
-        $vm_os = "ubuntu24.04";
-    } elsif ($vm_image_choice == 2) {
-        $vm_os = "debian13";
-    } elsif ($vm_image_choice == 3) {
-        $vm_os = "opensuse16.0";
+    if ($vm_image_choice) {
+        if ($vm_image_choice == 1) {
+            $vm_os = "ubuntu24.04";
+        } elsif ($vm_image_choice == 2) {
+            $vm_os = "debian13";
+        } elsif ($vm_image_choice == 3) {
+            $vm_os = "opensuse16.0";
+        } else {
+            $vm_os = "gentoo";
+        }
     } else {
-        $vm_os = "gentoo";
+        print(STDERR "OS image not specified!\n");
+        print(STDERR "Please either use interactive, or specify using the --os flag.\n");
     }
 
     if ($interactive) {
@@ -65,7 +70,7 @@ sub configure {
         $hostname = <STDIN>;
         chomp $hostname;
     } else {
-        if ($vm_name eq "") {
+        if (! $vm_name) {
             my $date;
             open DATE, "date -u +%s |" or die "$!";
             while (my $line = <DATE>) {
@@ -77,12 +82,8 @@ sub configure {
             close DATE;
         }
 
-        print(STDOUT "name => $vm_name\n");
         $hostname = $vm_name;
     }
-    
-    ## Select Cloud image OS
-    ($vm_image_choice, %vm_image_urls) = IMGDownload::select_image($vm_image_choice,$interactive);
     
     ## Create VM env
     $vm_env = "$VMConfig::virtual_machine{vm_dir}/$vm_name";
@@ -94,6 +95,16 @@ sub configure {
     $uid = getpwnam("$VMConfig::username");
     $gid = getgrnam("libvirt");
     chown($uid, $gid, $vm_env);
+
+    ## Display Configuration
+    print(STDOUT ">>> Using the following configuration:\n");
+    print(STDOUT "  name => $vm_name\n");
+    while (my ($key, $val) = each %VMConfig::virtual_machine) {
+        print(STDOUT "  $key => $val\n");
+    }
+
+    ## Select Cloud image OS
+    ($vm_image_choice, %vm_image_urls) = IMGDownload::select_image($vm_image_choice,$interactive);
 }
 
 sub create_vm_disk {
@@ -102,15 +113,21 @@ sub create_vm_disk {
     if ($interactive or $disksize eq "") {
         $disksize = <STDIN>;
         chomp $disksize;
-    } else { print(STDOUT "$disksize"."G\n"); }
+    } else { print(STDOUT "  $disksize"."G\n"); }
     $disksize = $disksize."G";
     
     open QEMU, "qemu-img create -b os_img.qcow2 -f qcow2 -F qcow2 \"$diskname\" $disksize |" or die "$!";
     while (my $line= <QEMU>) {
-        print(STDOUT "$line");
+        my @diskopts = split(" ", $line);
+        print(STDOUT "$diskopts[0] $diskopts[1]\n");
+        shift(@diskopts);
+        shift(@diskopts);
+        foreach my $diskopt (@diskopts) {
+            print(STDOUT " - $diskopt\n");
+        }
     }
     close QEMU;
-    print(STDOUT ">>> Image file created successfully.\n\n");
+    print(STDOUT "\n>>> Image file created successfully.\n");
     print(STDOUT ">>> Updating permissions.\n");
     chown($uid, $gid, $diskname);
 }
@@ -131,7 +148,7 @@ sub create_virtual_machine {
     
     open VIRT, $virt_str or die "$!";
     while (my $line= <VIRT>) {
-        print(STDOUT "$line");
+        print(STDOUT "  $line");
     }
     close VIRT;
 }
@@ -144,9 +161,9 @@ sub get_ip_address {
         open IP, "$dosu virsh domifaddr $vm_name |" or die "$!";
         while (my $line = <IP>) {
             if ($line =~ m/ipv4/) {
-                print(STDOUT " Name     MAC address         Protocol   Address\n");
-                print(STDOUT "-------------------------------------------------------------\n");
-                print(STDOUT "$line\n");
+                print(STDOUT "   Name     MAC address         Protocol   Address\n");
+                print(STDOUT "  -------------------------------------------------------------\n");
+                print(STDOUT "  $line\n");
                 $found = 1;
             }
         }
@@ -194,6 +211,7 @@ GetOptions(
     "username=s"    => \$VMConfig::virtual_machine{user},
 
     "create"        => \$create,
+    "debug"         => \$debug,
     "delete"        => \$delete,
     "interactive=s" => \$interactive,
 );

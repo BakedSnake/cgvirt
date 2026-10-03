@@ -8,21 +8,22 @@ our $username = $ENV{LOGNAME};
 our $config_file = "$ENV{HOME}/.config/cgvirt/cgvirt.conf";
 
 our %virtual_machine = (
-    vm_dir => "",
-    user => "$username",
-    ssh_key => "",
-    ram => "2096",
-    cpu => "2",
-    net => "default",
-    model => "virtio",
-    graphics => "spice",
-    boot => "uefi",
-    arch => "amd64"
+    arch        => "x86_64",
+    boot        => "uefi",
+    cpu         => "2",
+    graphics    => "spice",
+    model       => "virtio",
+    net         => "default",
+    ram         => "2096",
+    ssh_key     => "",
+    user        => "$username",
+    vm_dir      => ""
 );
 
 sub get_os_release {
     my $os_release;
     my $os_release_file = "/etc/os-release";
+
     open OS_RELEASE, "< $os_release_file" or die "Could not open file: $!";
     while (my $line = <OS_RELEASE>) {
         if ( $line =~ m/^ID/ ) {
@@ -30,8 +31,8 @@ sub get_os_release {
             $os_release = substr($parts[1], 1, -2);
         }
     }
-    close OS_RELEASE;
 
+    close OS_RELEASE;
     return $os_release;
 }
 

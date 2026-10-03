@@ -19,7 +19,8 @@ my $config_file = $VMConfig::config_file;
 my $uid;
 my $gid;
 my $vm_env;
-my $vm_name;
+my $vm_name = "";
+my $vm_os;
 my $vm_image_choice = 1;
 my %vm_image_urls;
 my $hostname;
@@ -46,7 +47,17 @@ sub prepare {
 }
 
 sub configure {
-    if ($interactive or $vm_name eq "") {
+    if ($vm_image_choice == 1) {
+        $vm_os = "ubuntu24.04";
+    } elsif ($vm_image_choice == 2) {
+        $vm_os = "debian13";
+    } elsif ($vm_image_choice == 3) {
+        $vm_os = "opensuse16.0";
+    } else {
+        $vm_os = "gentoo";
+    }
+
+    if ($interactive) {
         print(STDOUT "\nVM Name: ");
         $vm_name = <STDIN>;
         chomp $vm_name;
@@ -54,6 +65,18 @@ sub configure {
         $hostname = <STDIN>;
         chomp $hostname;
     } else {
+        if ($vm_name eq "") {
+            my $date;
+            open DATE, "date -u +%s |" or die "$!";
+            while (my $line = <DATE>) {
+                $date = $line;
+            }
+
+            chomp $date;
+            $vm_name = "$vm_os"."-$date";
+            close DATE;
+        }
+
         print(STDOUT "name => $vm_name\n");
         $hostname = $vm_name;
     }
@@ -93,17 +116,6 @@ sub create_vm_disk {
 }
 
 sub create_virtual_machine {
-    my $vm_os;
-    if ($vm_image_choice == 1) {
-        $vm_os = "ubuntu24.04";
-    } elsif ($vm_image_choice == 2) {
-        $vm_os = "debian13";
-    } elsif ($vm_image_choice == 3) {
-        $vm_os = "opensuse16.0";
-    } else {
-        $vm_os = "gentoo";
-    }
-    
     print(STDOUT "\n>>> Installing virtual machine.\n");
     my $virt_str = "$dosu virt-install --name $vm_name"
     . " --arch=$VMConfig::virtual_machine{arch}"

@@ -3,6 +3,12 @@ INSTALL_DIR=$(PREFIX)/bin
 PERL_PREFIX=/usr/lib64/perl5/5.44
 PERL_INSTALL_DIR=$(PERL_PREFIX)/CGVirt
 
+build:
+	clang -std=c99 -Wall -Wextra -Wpedantic -Wunused-value -o cgvt src/cgvt.c -lvirt
+
+clean:
+	rm -v cgvt
+
 install:
 	mkdir -p $(PERL_INSTALL_DIR)
 	install -m 0644 src/modules/CloudInit.pm $(PERL_INSTALL_DIR)

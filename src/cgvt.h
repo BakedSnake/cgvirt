@@ -1,4 +1,4 @@
-# include <libvirt/libvirt.h>
+#include <libvirt/libvirt.h>
 
 void list_vms(virConnectPtr conn);
 

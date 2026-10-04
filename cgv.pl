@@ -3,14 +3,13 @@
 use strict;
 use warnings;
 
-use File::Path qw( make_path );
 use Getopt::Long;
 use POSIX qw(setuid waitpid);
+use File::Path qw( make_path );
 
-use lib ".";
-use VMConfig;
-use CloudInit;
-use IMGDownload;
+use CGVirt::VMConfig;
+use CGVirt::CloudInit;
+use CGVirt::IMGDownload;
 
 my $os_release  = VMConfig::get_os_release();
 my $username    = $VMConfig::username;

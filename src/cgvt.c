@@ -94,6 +94,14 @@ void get_vm_info(char *name, virConnectPtr conn)
                 }
             }
 
+            virDomainInterfacePtr *ifaces = NULL;
+            int nc = virDomainInterfaceAddresses(dom, &ifaces, VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0);
+            for (int i = 0; i < nc; ++i) {
+                for (size_t j = 0; j < ifaces[i]->naddrs; ++j) {
+                    fprintf(stdout, "IP Address: %s\n", ifaces[i]->addrs[j].addr);
+                }
+            }
+
             virDomainFree(dom);
         }
     }

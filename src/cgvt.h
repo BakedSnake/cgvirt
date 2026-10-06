@@ -1,3 +1,4 @@
+#include <getopt.h>
 #include <libvirt/libvirt.h>
 
 virDomainPtr *get_all_domains(virConnectPtr conn);
@@ -13,3 +14,27 @@ void start_domain(virConnectPtr conn, const char *name);
 void stop_domain(virConnectPtr conn, const char *name);
 
 void delete_domain(virConnectPtr conn, const char *name);
+
+void create_domain(virConnectPtr conn);
+
+static struct option options[] = {
+  {"help",              no_argument,            0, 'h'},
+  {"version",           no_argument,            0, 'v'},
+  {"create",            no_argument,            0, 'x'},
+  {"list",              no_argument,            0, 'l'},
+  {"start",             required_argument,      0, 's'},
+  {"stop",              required_argument,      0, 'q'},
+
+  {"info",              required_argument,      0, 'i'},
+  {"arch",              required_argument,      0, 'a'},
+  {"boot",              required_argument,      0, 'b'},
+  {"cpu",               required_argument,      0, 'c'},
+  {"disk",              required_argument,      0, 'd'},
+  {"graphics",          required_argument,      0, 'g'},
+  {"memory",            required_argument,      0, 'r'},
+  {"model",             required_argument,      0, 'm'},
+  {"name",              required_argument,      0, 'n'},
+  {"net",               required_argument,      0, 'w'},
+  {"os",                required_argument,      0, 'o'},
+  {0,                   0,                      0,  0 }
+};

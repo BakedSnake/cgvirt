@@ -4,7 +4,7 @@ PERL_PREFIX=/usr/lib64/perl5/5.44
 PERL_INSTALL_DIR=$(PERL_PREFIX)/CGVirt
 
 build:
-	clang -std=c99 -Wall -Wextra -Wpedantic -Wunused-value -o cgvt src/cgvt.c -lvirt
+	clang -std=c99 -Wall -Wextra -Wpedantic -Wunused-value -o cgvt src/cgvt.c -I/usr/include/libxml2 -lvirt -lxml2
 
 clean:
 	rm -v cgvt

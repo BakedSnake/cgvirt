@@ -1,15 +1,90 @@
 #include <stdio.h>
 #include <string.h>
+#include <libxml/xmlwriter.h>
 
 #include "cgvt.h"
 
 int TOTAL_VM_COUNT = 0;
 
+char *NAME = NULL;
+char *ARCH = NULL;
+char *BOOT = NULL;
+char *CPU  = NULL;
+char *MEMORY  = NULL;
+char *DISK = NULL;
+char *NET = NULL;
+char *MODEL = NULL;
+char *GRAPHICS = NULL;
+
+int argHandle(virConnectPtr conn, int argc, char* argv[])
+{
+    int opt;
+    const char * arg_str = "hvli:a:b:c:d:g:r:m:n:w:o:s:q:x";
+    while ((opt = getopt_long(argc, argv, arg_str, options, NULL)) != -1) {
+        switch (opt) {
+            case 'h':
+                // TODO
+            case 'v':
+                // TODO
+            case 'a':
+                ARCH = optarg;
+                break;
+            case 'b':
+                BOOT = optarg;
+                break;
+            case 'c':
+                CPU = optarg;
+                break;
+            case 'd':
+                DISK = optarg;
+                break;
+            case 'w':
+                NET = optarg;
+                break;
+            case 'm':
+                MODEL = optarg;
+                break;
+            case 'g':
+                GRAPHICS = optarg;
+                break;
+            case 'n':
+                NAME = optarg;
+                break;
+            case 'r':
+                MEMORY = optarg;
+                break;
+            case 'l':
+                fprintf(stdout, "List:\n");
+                show_domains(conn);
+                fprintf(stdout, "\n");
+                return 0;
+            case 'i':
+                fprintf(stdout, "%s:\n", optarg);
+                show_vm_info(optarg, conn);
+                return 0;
+            case 's':
+                start_domain(conn, optarg);
+                return 0;
+            case 'q':
+                stop_domain(conn, optarg);
+                return 0;
+            case 'x':
+                create_domain(conn);
+                break;
+            case '?':
+                default:
+                break;
+        }
+    }
+
+    return 0;
+}
+
 int main(int argc, char **argv) {
     virConnectPtr conn;
 
     if (argc < 2) {
-        fprintf(stderr, "Please provide vm name.\n");
+        fprintf(stderr, "Please provide argument.\n");
         return 1;
     }
 
@@ -19,23 +94,97 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    fprintf(stdout, "List:\n");
-    show_domains(conn);
-    fprintf(stdout, "\n");
-
-    fprintf(stdout, "%s:\n", argv[1]);
-    show_vm_info(argv[1], conn);
-
-    virDomainPtr dom = get_domain(conn, argv[1]);
-    if (dom != NULL) {
-        const char *name = virDomainGetName(dom);
-        fprintf(stdout, "\nGot Domain: %s\n", name);
-    }
-
-    delete_domain(conn, argv[1]);
+    int e = argHandle(conn, argc, argv);
+    if (e != 0) return 0;
 
     virConnectClose(conn);
     return 0;
+}
+
+void create_domain(virConnectPtr conn)
+{
+    xmlBufferPtr buf = xmlBufferCreate();
+    if (!buf) return;
+    xmlTextWriterPtr w = xmlNewTextWriterMemory(buf, 0);
+    if (!w) {
+        fprintf(stderr, "Failed to create writer\n");
+        return;
+    }
+
+    xmlTextWriterStartDocument(w, NULL, "UTF-8", NULL);
+        xmlTextWriterStartElement(w, BAD_CAST "domain");
+
+            xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "kvm");
+            xmlTextWriterWriteElement(w, BAD_CAST "name", BAD_CAST NAME);
+            xmlTextWriterStartElement(w, BAD_CAST "memory");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "unit", BAD_CAST "KiB");
+                xmlTextWriterWriteString(w, BAD_CAST MEMORY);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "vcpu");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "placement", BAD_CAST "static");
+                xmlTextWriterWriteString(w, BAD_CAST CPU);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "os");
+                xmlTextWriterStartElement(w, BAD_CAST "type");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "arch", BAD_CAST ARCH);
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST "pc");
+                    xmlTextWriterWriteString(w, BAD_CAST "hvm");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "boot");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "hd");
+                xmlTextWriterEndElement(w);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "devices");
+
+                xmlTextWriterWriteElement(w, BAD_CAST "emulator",
+                    BAD_CAST "/usr/bin/qemu-system-x86_64");
+                xmlTextWriterStartElement(w, BAD_CAST "disk");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "file");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "device", BAD_CAST "disk");
+                xmlTextWriterStartElement(w, BAD_CAST "driver");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "qemu");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "qcow2");
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "source");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "file",
+                        BAD_CAST DISK);
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "target");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "vda");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "bus", BAD_CAST "virtio");
+                    xmlTextWriterEndElement(w);
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "interface");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "network");
+                    xmlTextWriterStartElement(w, BAD_CAST "source");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "network", BAD_CAST NET);
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "model");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST MODEL);
+                    xmlTextWriterEndElement(w);
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "graphics");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST GRAPHICS);
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "port", BAD_CAST "-1");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "autoport", BAD_CAST "yes");
+                xmlTextWriterEndElement(w);
+
+            xmlTextWriterEndElement(w);
+
+        xmlTextWriterEndElement(w); /* </domain> */
+    xmlTextWriterEndDocument(w);
+    xmlTextWriterFlush(w);
+
+    //printf("%s\n", (char *)xmlBufferContent(buf));
+    const char* xml = (char *)xmlBufferContent(buf);
+    virDomainDefineXML(conn, xml);
+    xmlBufferFree(buf);
 }
 
 void delete_domain(virConnectPtr conn, const char *name)

@@ -32,8 +32,22 @@ int main(int argc, char **argv) {
         fprintf(stdout, "\nGot Domain: %s\n", name);
     }
 
+    delete_domain(conn, argv[1]);
+
     virConnectClose(conn);
     return 0;
+}
+
+void delete_domain(virConnectPtr conn, const char *name)
+{
+    virDomainPtr *doms = get_all_domains(conn);
+    if (doms != NULL) {
+        for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
+            const char *dom_name = virDomainGetName(doms[i]);
+            if (doms[i] != NULL && strcmp(dom_name, name) == 0)
+                virDomainUndefine(doms[i]);
+        }
+    }
 }
 
 void start_domain(virConnectPtr conn, const char *name)

@@ -11,3 +11,5 @@ void show_vm_info(char *name, virConnectPtr conn);
 void start_domain(virConnectPtr conn, const char *name);
 
 void stop_domain(virConnectPtr conn, const char *name);
+
+void delete_domain(virConnectPtr conn, const char *name);

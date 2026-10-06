@@ -3,6 +3,8 @@
 
 #include "cgvt.h"
 
+int TOTAL_VM_COUNT = 0;
+
 int main(int argc, char **argv) {
     virConnectPtr conn;
 
@@ -17,90 +19,88 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    fprintf(stdout, "List:\n");
     list_vms(conn);
+    fprintf(stdout, "\n");
 
     fprintf(stdout, "%s:\n", argv[1]);
-    get_vm_info(argv[1], conn);
+    show_vm_info(argv[1], conn);
+
+    virDomainPtr dom = get_domain(conn, argv[1]);
+    if (dom != NULL) {
+        const char *name = virDomainGetName(dom);
+        fprintf(stdout, "\nGot Domain: %s\n", name);
+    }
 
     virConnectClose(conn);
     return 0;
 }
 
-void list_vms(virConnectPtr conn)
+virDomainPtr *get_all_domains(virConnectPtr conn)
 {
-    int domains;
-    virDomainPtr dom;
-
-    domains = virConnectNumOfDomains(conn);
-    fprintf(stdout, "Defined active domains: %d\n", domains);
-
-    int ids[domains];
-    int n = virConnectListDomains(conn, ids, domains);
-    for (int i = 0; i < n; ++i) {
-        dom = virDomainLookupByID(conn, ids[i]);
-        if (dom) {
-            fprintf(stdout, "  %s :: %d\n", virDomainGetName(dom), ids[i]);
-            virDomainFree(dom);
-        }
+    virDomainPtr *domains = NULL;
+    TOTAL_VM_COUNT = virConnectListAllDomains(conn, &domains, 0);
+    if (TOTAL_VM_COUNT > 0) {
+        return domains;
     }
-    fprintf(stdout, "\n");
 
-    domains = virConnectNumOfDefinedDomains(conn);
-    fprintf(stdout, "Defined domains: %d\n", domains);
-
-    char *names[domains];
-    n = virConnectListDefinedDomains(conn, names, domains);
-    for (int i = 0; i < n; ++i) {
-        dom = virDomainLookupByName(conn, names[i]);
-        if (dom) {
-            fprintf(stdout, "  %s :: %d\n", names[i], virDomainGetID(dom));
-            virDomainFree(dom);
-        }
-    }
-    fprintf(stdout, "\n");
+    return NULL;
 }
 
-void get_vm_info(char *name, virConnectPtr conn)
+virDomainPtr get_domain(virConnectPtr conn, char *name)
 {
-    int domains = virConnectNumOfDefinedDomains(conn);
-    if (domains > 0) {
-        char *names[domains];
-        int n = virConnectListDefinedDomains(conn, names, domains);
-        for (int i = 0; i < n; ++i) {
-            virDomainPtr dom = virDomainLookupByName(conn, names[i]);
-            if (dom && strcmp(virDomainGetName(dom), name) == 0) {
-                virDomainInfo dm;
-                if (virDomainGetInfo(dom, &dm) == 0) {
-                    fprintf(stdout, "State: %s, Max Memory: %lu, CPU nr: %d\n",
-                            dm.state == 1 ? "Running" : "Stopped", dm.maxMem, dm.nrVirtCpu);
-                }
+    virDomainPtr *doms = get_all_domains(conn);
+    if (doms != NULL) {
+        for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
+            if (doms[i] != NULL && strcmp(virDomainGetName(doms[i]), name) == 0) {
+                return doms[i];
             }
-
-            virDomainFree(dom);
         }
     }
 
-    domains = virConnectNumOfDomains(conn);
-    if (domains > 0) {
-        int ids[domains];
-        int n = virConnectListDomains(conn, ids, domains);
-        for (int i = 0; i < n; ++i) {
-            virDomainPtr dom = virDomainLookupByID(conn, ids[i]);
-            if (dom && strcmp(virDomainGetName(dom), name) == 0) {
+    return NULL;
+}
+
+void list_vms(virConnectPtr conn)
+{
+    virDomainPtr *doms = get_all_domains(conn);
+    if (doms != NULL) {
+        for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
+            if (doms[i]) {
+                const char *name = virDomainGetName(doms[i]);
+                int id = virDomainGetID(doms[i]);
+                fprintf(stdout, "  %d - %s\n", id, name);
+            }
+
+            virDomainFree(doms[i]);
+        }
+    }
+}
+
+void show_vm_info(char *name, virConnectPtr conn)
+{
+    virDomainPtr *doms = get_all_domains(conn);
+    if (doms != NULL) {
+        for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
+            virDomainPtr dom = doms[i];
+            if (dom != NULL && strcmp(virDomainGetName(dom), name) == 0) {
                 virDomainInfo dm;
                 if (virDomainGetInfo(dom, &dm) == 0) {
-                    fprintf(stdout, "State: %s, Max Memory: %lu, CPU nr: %d\n",
+                    fprintf(stdout, "  State: %s, Max Memory: %lu, CPU nr: %d\n",
                             dm.state == 1 ? "Running" : "Stopped", dm.maxMem, dm.nrVirtCpu);
+                }
+
+                if (dm.state == 1) {
+                    virDomainInterfacePtr *ifaces = NULL;
+                    int nc = virDomainInterfaceAddresses(dom, &ifaces, VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0);
+                    for (int i = 0; i < nc; ++i) {
+                        for (size_t j = 0; j < ifaces[i]->naddrs; ++j) {
+                            fprintf(stdout, "  IP Address: %s\n", ifaces[i]->addrs[j].addr);
+                        }
+                    }
                 }
             }
 
-            virDomainInterfacePtr *ifaces = NULL;
-            int nc = virDomainInterfaceAddresses(dom, &ifaces, VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE, 0);
-            for (int i = 0; i < nc; ++i) {
-                for (size_t j = 0; j < ifaces[i]->naddrs; ++j) {
-                    fprintf(stdout, "IP Address: %s\n", ifaces[i]->addrs[j].addr);
-                }
-            }
 
             virDomainFree(dom);
         }

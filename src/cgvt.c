@@ -10,6 +10,7 @@ char *NAME = NULL;
 char *ARCH = NULL;
 char *BOOT = NULL;
 char *CPU  = NULL;
+char *CD   = NULL;
 char *MEMORY  = NULL;
 char *DISK = NULL;
 char *NET = NULL;
@@ -19,7 +20,7 @@ char *GRAPHICS = NULL;
 int argHandle(virConnectPtr conn, int argc, char* argv[])
 {
     int opt;
-    const char * arg_str = "hvli:a:b:c:d:g:r:m:n:w:o:s:q:x";
+    const char * arg_str = "hvli:a:b:c:d:g:r:m:n:w:o:s:q:O:x";
     while ((opt = getopt_long(argc, argv, arg_str, options, NULL)) != -1) {
         switch (opt) {
             case 'h':
@@ -52,6 +53,9 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
                 break;
             case 'r':
                 MEMORY = optarg;
+                break;
+            case 'O':
+                CD = optarg;
                 break;
             case 'l':
                 fprintf(stdout, "List:\n");
@@ -117,7 +121,7 @@ void create_domain(virConnectPtr conn)
             xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "kvm");
             xmlTextWriterWriteElement(w, BAD_CAST "name", BAD_CAST NAME);
             xmlTextWriterStartElement(w, BAD_CAST "memory");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "unit", BAD_CAST "KiB");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "unit", BAD_CAST "MiB");
                 xmlTextWriterWriteString(w, BAD_CAST MEMORY);
             xmlTextWriterEndElement(w);
 
@@ -129,8 +133,11 @@ void create_domain(virConnectPtr conn)
             xmlTextWriterStartElement(w, BAD_CAST "os");
                 xmlTextWriterStartElement(w, BAD_CAST "type");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "arch", BAD_CAST ARCH);
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST "pc");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST "q35");
                     xmlTextWriterWriteString(w, BAD_CAST "hvm");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "boot");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "cdrom");
                 xmlTextWriterEndElement(w);
                 xmlTextWriterStartElement(w, BAD_CAST "boot");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "hd");
@@ -141,6 +148,7 @@ void create_domain(virConnectPtr conn)
 
                 xmlTextWriterWriteElement(w, BAD_CAST "emulator",
                     BAD_CAST "/usr/bin/qemu-system-x86_64");
+
                 xmlTextWriterStartElement(w, BAD_CAST "disk");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "file");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "device", BAD_CAST "disk");
@@ -150,12 +158,28 @@ void create_domain(virConnectPtr conn)
                 xmlTextWriterEndElement(w);
 
                 xmlTextWriterStartElement(w, BAD_CAST "source");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "file",
-                        BAD_CAST DISK);
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "file", BAD_CAST DISK);
                     xmlTextWriterEndElement(w);
                     xmlTextWriterStartElement(w, BAD_CAST "target");
                         xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "vda");
                         xmlTextWriterWriteAttribute(w, BAD_CAST "bus", BAD_CAST "virtio");
+                    xmlTextWriterEndElement(w);
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "disk");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "file");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "device", BAD_CAST "cdrom");
+                xmlTextWriterStartElement(w, BAD_CAST "driver");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "qemu");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "raw");
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "source");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "file", BAD_CAST CD);
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "target");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "sda");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "bus", BAD_CAST "scsi");
                     xmlTextWriterEndElement(w);
                 xmlTextWriterEndElement(w);
 
@@ -175,13 +199,19 @@ void create_domain(virConnectPtr conn)
                     xmlTextWriterWriteAttribute(w, BAD_CAST "autoport", BAD_CAST "yes");
                 xmlTextWriterEndElement(w);
 
+                xmlTextWriterStartElement(w, BAD_CAST "controller");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "scsi");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "index", BAD_CAST "0");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "virtio-scsi");
+                xmlTextWriterEndElement(w);
+
             xmlTextWriterEndElement(w);
 
         xmlTextWriterEndElement(w); /* </domain> */
     xmlTextWriterEndDocument(w);
     xmlTextWriterFlush(w);
 
-    //printf("%s\n", (char *)xmlBufferContent(buf));
+    printf("%s\n", (char *)xmlBufferContent(buf));
     const char* xml = (char *)xmlBufferContent(buf);
     virDomainDefineXML(conn, xml);
     xmlBufferFree(buf);

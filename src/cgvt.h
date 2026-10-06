@@ -29,6 +29,7 @@ static struct option options[] = {
   {"arch",              required_argument,      0, 'a'},
   {"boot",              required_argument,      0, 'b'},
   {"cpu",               required_argument,      0, 'c'},
+  {"cd",                required_argument,      0, 'O'},
   {"disk",              required_argument,      0, 'd'},
   {"graphics",          required_argument,      0, 'g'},
   {"memory",            required_argument,      0, 'r'},

@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     }
 
     fprintf(stdout, "List:\n");
-    list_vms(conn);
+    show_domains(conn);
     fprintf(stdout, "\n");
 
     fprintf(stdout, "%s:\n", argv[1]);
@@ -34,6 +34,32 @@ int main(int argc, char **argv) {
 
     virConnectClose(conn);
     return 0;
+}
+
+void start_domain(virConnectPtr conn, const char *name)
+{
+    virDomainPtr *doms = get_all_domains(conn);
+    if (doms != NULL) {
+        for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
+            const char *dom_name = virDomainGetName(doms[i]);
+            if (doms[i] != NULL && strcmp(dom_name, name) == 0) {
+                virDomainCreate(doms[i]);
+            }
+        }
+    }
+}
+
+void stop_domain(virConnectPtr conn, const char *name)
+{
+    virDomainPtr *doms = get_all_domains(conn);
+    if (doms != NULL) {
+        for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
+            const char *dom_name = virDomainGetName(doms[i]);
+            if (doms[i] != NULL && strcmp(dom_name, name) == 0) {
+                virDomainDestroy(doms[i]);
+            }
+        }
+    }
 }
 
 virDomainPtr *get_all_domains(virConnectPtr conn)
@@ -61,7 +87,7 @@ virDomainPtr get_domain(virConnectPtr conn, char *name)
     return NULL;
 }
 
-void list_vms(virConnectPtr conn)
+void show_domains(virConnectPtr conn)
 {
     virDomainPtr *doms = get_all_domains(conn);
     if (doms != NULL) {

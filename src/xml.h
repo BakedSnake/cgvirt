@@ -11,3 +11,5 @@ void get_features_xml(xmlTextWriterPtr w);
 void get_cpu_conf_xml(xmlTextWriterPtr w);
 
 const char* get_domain_xml(xmlBufferPtr buf);
+
+void get_nvram_path(const char* name);

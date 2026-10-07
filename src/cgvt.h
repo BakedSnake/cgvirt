@@ -13,6 +13,7 @@ extern char *DISK;
 extern char *NET;
 extern char *MODEL;
 extern char *GRAPHICS;
+extern char NVRAM[256];
 
 
 virDomainPtr *get_all_domains(virConnectPtr conn);
@@ -38,6 +39,7 @@ static struct option options[] = {
   {"list",              no_argument,            0, 'l'},
   {"start",             required_argument,      0, 's'},
   {"stop",              required_argument,      0, 'q'},
+  {"delete",            required_argument,      0, 'X'},
 
   {"info",              required_argument,      0, 'i'},
   {"arch",              required_argument,      0, 'a'},

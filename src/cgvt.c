@@ -17,11 +17,12 @@ char *DISK = NULL;
 char *NET = NULL;
 char *MODEL = NULL;
 char *GRAPHICS = NULL;
+char NVRAM[256] = { 0 };
 
 int argHandle(virConnectPtr conn, int argc, char* argv[])
 {
     int opt;
-    const char * arg_str = "hvli:a:b:c:d:g:r:m:n:w:o:s:q:O:x";
+    const char * arg_str = "hvli:a:b:c:d:g:r:m:n:w:o:s:q:O:X:x";
     while ((opt = getopt_long(argc, argv, arg_str, options, NULL)) != -1) {
         switch (opt) {
             case 'h':
@@ -76,6 +77,11 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
             case 'x':
                 create_domain(conn);
                 break;
+            case 'X':
+                get_nvram_path(optarg);
+                fprintf(stdout, "%s\n", NVRAM);
+                delete_domain(conn, optarg);
+                break;
             case '?':
                 default:
                 break;
@@ -123,7 +129,7 @@ void delete_domain(virConnectPtr conn, const char *name)
         for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
             const char *dom_name = virDomainGetName(doms[i]);
             if (doms[i] != NULL && strcmp(dom_name, name) == 0)
-                virDomainUndefine(doms[i]);
+                virDomainUndefineFlags(doms[i], VIR_DOMAIN_UNDEFINE_KEEP_NVRAM);
         }
     }
 }

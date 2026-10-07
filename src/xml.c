@@ -20,11 +20,13 @@ void get_vcpu_xml(xmlTextWriterPtr w)
 
 }
 
+void get_nvram_path(const char *name)
+{
+    snprintf(NVRAM, 256, "/var/lib/libvirt/qemu/nvram/%s_VARS.qcow2", name);
+}
+
 void get_firmware_xml(xmlTextWriterPtr w)
 {
-    char nvram[256];
-    snprintf(nvram, 256, "/var/lib/libvirt/qemu/nvram/%s.qcow2", NAME);
-
     xmlTextWriterStartElement(w, BAD_CAST "os");
         xmlTextWriterWriteAttribute(w, BAD_CAST "firmware", BAD_CAST "efi");
         xmlTextWriterStartElement(w, BAD_CAST "firmware");
@@ -46,7 +48,7 @@ void get_firmware_xml(xmlTextWriterPtr w)
                 xmlTextWriterWriteAttribute(w, BAD_CAST "template", BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.qcow2");
                 xmlTextWriterWriteAttribute(w, BAD_CAST "templateFormat", BAD_CAST "qcow2");
                 xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
-                xmlTextWriterWriteString(w, BAD_CAST nvram);
+                xmlTextWriterWriteString(w, BAD_CAST NVRAM);
             xmlTextWriterEndElement(w);
         xmlTextWriterEndElement(w);
 

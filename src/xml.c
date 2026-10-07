@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "cgvt.h"
 #include "xml.h"
 
@@ -20,8 +22,34 @@ void get_vcpu_xml(xmlTextWriterPtr w)
 
 void get_firmware_xml(xmlTextWriterPtr w)
 {
+    char nvram[256];
+    snprintf(nvram, 256, "/var/lib/libvirt/qemu/nvram/%s.qcow2", NAME);
+
     xmlTextWriterStartElement(w, BAD_CAST "os");
         xmlTextWriterWriteAttribute(w, BAD_CAST "firmware", BAD_CAST "efi");
+        xmlTextWriterStartElement(w, BAD_CAST "firmware");
+            xmlTextWriterStartElement(w, BAD_CAST "feature");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "enabled", BAD_CAST "yes");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "enrolled-keys");
+            xmlTextWriterEndElement(w);
+            xmlTextWriterStartElement(w, BAD_CAST "feature");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "enabled", BAD_CAST "yes");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "secure-boot");
+            xmlTextWriterEndElement(w);
+            xmlTextWriterStartElement(w, BAD_CAST "loader");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "readonly", BAD_CAST "yes");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "pflash");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
+                xmlTextWriterWriteString(w, BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.qcow2");
+            xmlTextWriterEndElement(w);
+            xmlTextWriterStartElement(w, BAD_CAST "nvram");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "template", BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.qcow2");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "templateFormat", BAD_CAST "qcow2");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
+                xmlTextWriterWriteString(w, BAD_CAST nvram);
+            xmlTextWriterEndElement(w);
+        xmlTextWriterEndElement(w);
+
         xmlTextWriterStartElement(w, BAD_CAST "type");
             xmlTextWriterWriteAttribute(w, BAD_CAST "arch", BAD_CAST ARCH);
             xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST "q35");
@@ -68,17 +96,19 @@ const char* get_domain_xml(void)
         return NULL;
     }
 
-    /*
-     * When efi is set, libvirt will enable secure boot
-     * So we must explicitly set this via flags
-     *
-     * <firmware>
-     *   <feature enabled="yes" name="enrolled-keys"/>
-     *   <feature enabled="yes" name="secure-boot"/>
-     * </firmware>
-     * <loader readonly="yes" secure="yes" type="pflash" format="raw">/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.fd</loader>
-     * <nvram template="/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.fd" templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/susieline_VARS.fd</nvram>
-     */
+   /*
+    * When efi is set, libvirt will enable secure boot
+    * So we must explicitly set this via flags
+    *
+    * <firmware>
+    *   <feature enabled="yes" name="enrolled-keys"/>
+    *   <feature enabled="yes" name="secure-boot"/>
+    * </firmware>
+    * <loader readonly="yes" secure="yes" type="pflash" \
+    *  format="raw">/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.fd</loader>
+    * <nvram template="/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.fd" \
+    *  templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/susieline_VARS.fd</nvram>
+    */
 
     xmlTextWriterStartDocument(w, NULL, "UTF-8", NULL);
         xmlTextWriterStartElement(w, BAD_CAST "domain");

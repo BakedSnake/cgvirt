@@ -5,12 +5,15 @@ PERL_INSTALL_DIR=$(PERL_PREFIX)/CGVirt
 CC = clang
 CFLAGS = -std=c99 -Wall -Wextra -Wpedantic -Wunused-value -I/usr/include/libxml2
 LDFLAGS = -lvirt -lxml2
+SOURCES = src/cgvt.c src/xml.c
+OBJECTS = $(SOURCES:.c=.o)
+TARGET = cgvt
 
-build:
-	$(CC) $(CFLAGS) -o cgvt src/cgvt.c $(LDFLAGS)
+$(TARGET): $(OBJECTS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
-	rm -v cgvt
+	rm -v cgvt src/*.o
 
 install:
 	mkdir -p $(PERL_INSTALL_DIR)

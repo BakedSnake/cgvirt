@@ -12,7 +12,7 @@ sub select_image {
     my @os_images = qw( Ubuntu Debian OpenSuse );
     my %os_img_urls = (
         1 => "https://chuangtzu.ftp.acc.umu.se/images/cloud/trixie/20260914-2601/debian-13-generic-amd64-20260914-2601.qcow2",
-        2 => "https://distfiles.gentoo.org/releases/arm64/autobuilds/current-di-arm64-console/di-arm64-console-20260913T234554Z.qcow2",
+        2 => "https://distfiles.gentoo.org/releases/amd64/autobuilds/20261004T164559Z/di-amd64-cloudinit-20261004T164559Z.qcow2",
         3 => "https://distfiles.gentoo.org/releases/amd64/autobuilds/current-di-amd64-console/di-amd64-console-20260927T170058Z.qcow2",
         4 => "https://download.opensuse.org/distribution/openSUSE-stable/appliances/Leap-16.0-Minimal-VM.x86_64-Cloud.qcow2",
         5 => "https://cloud-images.ubuntu.com/noble/20260926/noble-server-cloudimg-amd64.img",

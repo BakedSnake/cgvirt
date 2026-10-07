@@ -130,24 +130,80 @@ void create_domain(virConnectPtr conn)
                 xmlTextWriterWriteString(w, BAD_CAST CPU);
             xmlTextWriterEndElement(w);
 
+//            <firmware>
+//              <feature enabled="yes" name="enrolled-keys"/>
+//              <feature enabled="yes" name="secure-boot"/>
+//            </firmware>
+//            <loader readonly="yes" secure="yes" type="pflash" format="raw">/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.fd</loader>
+//            <nvram template="/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.fd" templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/susieline_VARS.fd</nvram>
+
             xmlTextWriterStartElement(w, BAD_CAST "os");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "firmware", BAD_CAST "efi");
                 xmlTextWriterStartElement(w, BAD_CAST "type");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "arch", BAD_CAST ARCH);
                     xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST "q35");
                     xmlTextWriterWriteString(w, BAD_CAST "hvm");
                 xmlTextWriterEndElement(w);
                 xmlTextWriterStartElement(w, BAD_CAST "boot");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "cdrom");
-                xmlTextWriterEndElement(w);
-                xmlTextWriterStartElement(w, BAD_CAST "boot");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "hd");
                 xmlTextWriterEndElement(w);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "features");
+                xmlTextWriterStartElement(w, BAD_CAST "acpi");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "apic");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "vmport");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "state", BAD_CAST "off");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "smm");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "state", BAD_CAST "on");
+                xmlTextWriterEndElement(w);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "cpu");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "mode", BAD_CAST "host-passthrough");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "check", BAD_CAST "none");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "migratable", BAD_CAST "on");
             xmlTextWriterEndElement(w);
 
             xmlTextWriterStartElement(w, BAD_CAST "devices");
 
                 xmlTextWriterWriteElement(w, BAD_CAST "emulator",
                     BAD_CAST "/usr/bin/qemu-system-x86_64");
+
+                xmlTextWriterStartElement(w, BAD_CAST "video");
+                    xmlTextWriterStartElement(w, BAD_CAST "model");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "virtio");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "heads", BAD_CAST "1");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "primary", BAD_CAST "yes");
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "driver");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "qemu");
+                    xmlTextWriterEndElement(w);
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "controller");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "scsi");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "index", BAD_CAST "0");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "virtio-scsi");
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "serial");
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "sound");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "ich9");
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "rng");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "virtio");
+                    xmlTextWriterStartElement(w, BAD_CAST "backend");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "random");
+                        xmlTextWriterWriteString(w, BAD_CAST "/dev/urandom");
+                    xmlTextWriterEndElement(w);
+                xmlTextWriterEndElement(w);
 
                 xmlTextWriterStartElement(w, BAD_CAST "disk");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "file");
@@ -193,17 +249,30 @@ void create_domain(virConnectPtr conn)
                     xmlTextWriterEndElement(w);
                 xmlTextWriterEndElement(w);
 
-                xmlTextWriterStartElement(w, BAD_CAST "graphics");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST GRAPHICS);
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "port", BAD_CAST "-1");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "autoport", BAD_CAST "yes");
+                xmlTextWriterStartElement(w, BAD_CAST "channel");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "spicevmc");
+                    xmlTextWriterStartElement(w, BAD_CAST "target");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "virtio");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "com.redhat.spice.0");
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "alias");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "channel1");
+                    xmlTextWriterEndElement(w);
                 xmlTextWriterEndElement(w);
 
-                xmlTextWriterStartElement(w, BAD_CAST "controller");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "scsi");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "index", BAD_CAST "0");
-                    xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "virtio-scsi");
+                xmlTextWriterStartElement(w, BAD_CAST "graphics");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST GRAPHICS);
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "autoport", BAD_CAST "yes");
+                    xmlTextWriterStartElement(w, BAD_CAST "listen");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "address");
+                    xmlTextWriterEndElement(w);
                 xmlTextWriterEndElement(w);
+
+                //xmlTextWriterStartElement(w, BAD_CAST "controller");
+                //    xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "pci");
+                //    xmlTextWriterWriteAttribute(w, BAD_CAST "index", BAD_CAST "0");
+                //    xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "pci-root");
+                //xmlTextWriterEndElement(w);
 
             xmlTextWriterEndElement(w);
 

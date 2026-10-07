@@ -1,6 +1,20 @@
 #include <getopt.h>
 #include <libvirt/libvirt.h>
 
+extern int TOTAL_VM_COUNT;
+
+extern char *NAME;
+extern char *ARCH;
+extern char *BOOT;
+extern char *CPU;
+extern char *CD;
+extern char *MEMORY;
+extern char *DISK;
+extern char *NET;
+extern char *MODEL;
+extern char *GRAPHICS;
+
+
 virDomainPtr *get_all_domains(virConnectPtr conn);
 
 virDomainPtr get_domain(virConnectPtr conn, char *name);

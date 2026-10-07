@@ -27,7 +27,6 @@ sub configure {
 users:
   - name: $VMConfig::virtual_machine{user}
     lock_passwd: False
-    password: $hostname
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
@@ -35,9 +34,9 @@ users:
       - $u_key 
 
 chpasswd:
-    list: |
-        $hostname:$hostname
-    expire: False
+  expire: false
+  users:
+  - {name: $username, password: password, type: text}
 ssh_pwauth: True
     \n");
     close USERD;

@@ -374,7 +374,7 @@ void show_vm_info(char *name, virConnectPtr conn)
             if (dom != NULL && strcmp(virDomainGetName(dom), name) == 0) {
                 virDomainInfo dm;
                 if (virDomainGetInfo(dom, &dm) == 0) {
-                    fprintf(stdout, "  State: %s, Max Memory: %lu, CPU nr: %d\n",
+                    fprintf(stdout, "  State: %s\n  Max Memory: %lu\n  CPU nr: %d\n",
                             dm.state == 1 ? "Running" : "Stopped", dm.maxMem, dm.nrVirtCpu);
                 }
 

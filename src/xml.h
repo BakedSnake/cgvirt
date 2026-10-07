@@ -10,4 +10,4 @@ void get_features_xml(xmlTextWriterPtr w);
 
 void get_cpu_conf_xml(xmlTextWriterPtr w);
 
-const char* get_domain_xml(void);
+const char* get_domain_xml(xmlBufferPtr buf);

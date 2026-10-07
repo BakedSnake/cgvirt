@@ -108,9 +108,12 @@ int main(int argc, char **argv) {
 
 void create_domain(virConnectPtr conn)
 {
-    const char* xml = get_domain_xml();
+    xmlBufferPtr buf = xmlBufferCreate();
+    if (!buf) return;
+    const char* xml = get_domain_xml(buf);
     printf("%s\n", xml);
     virDomainDefineXML(conn, xml);
+    xmlBufferFree(buf);
 }
 
 void delete_domain(virConnectPtr conn, const char *name)

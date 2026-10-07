@@ -86,29 +86,13 @@ void get_cpu_conf_xml(xmlTextWriterPtr w)
     xmlTextWriterEndElement(w);
 }
 
-const char* get_domain_xml(void)
+const char* get_domain_xml(xmlBufferPtr buf)
 {
-    xmlBufferPtr buf = xmlBufferCreate();
-    if (!buf) return NULL;
     xmlTextWriterPtr w = xmlNewTextWriterMemory(buf, 0);
     if (!w) {
         fprintf(stderr, "Failed to create writer\n");
         return NULL;
     }
-
-   /*
-    * When efi is set, libvirt will enable secure boot
-    * So we must explicitly set this via flags
-    *
-    * <firmware>
-    *   <feature enabled="yes" name="enrolled-keys"/>
-    *   <feature enabled="yes" name="secure-boot"/>
-    * </firmware>
-    * <loader readonly="yes" secure="yes" type="pflash" \
-    *  format="raw">/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.fd</loader>
-    * <nvram template="/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.fd" \
-    *  templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/susieline_VARS.fd</nvram>
-    */
 
     xmlTextWriterStartDocument(w, NULL, "UTF-8", NULL);
         xmlTextWriterStartElement(w, BAD_CAST "domain");
@@ -234,7 +218,5 @@ const char* get_domain_xml(void)
     xmlTextWriterFlush(w);
 
     const char* xml = (char *)xmlBufferContent(buf);
-    xmlBufferFree(buf);
-
     return xml;
 }

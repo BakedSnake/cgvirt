@@ -10,6 +10,7 @@ use File::Path qw( make_path );
 use CGVirt::VMConfig;
 use CGVirt::CloudInit;
 use CGVirt::IMGDownload;
+use CGVirt::Network;
 
 my $os_release  = VMConfig::get_os_release();
 my $username    = $VMConfig::username;

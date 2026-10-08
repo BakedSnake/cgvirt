@@ -33,9 +33,6 @@ sub accept_forwarding {
     close(FORWARD);
 }
 
-sub sst {
-}
-
 sub setup_postrouting {
     # for now using default qemu network
     open POST, "$dosu iptables -t nat -A POSTROUTING -s 192.168.122.0/24 -o $host_iface -j MASQUERADE |" or die "$!";

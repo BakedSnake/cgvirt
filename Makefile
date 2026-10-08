@@ -17,9 +17,7 @@ clean:
 
 install:
 	mkdir -p $(PERL_INSTALL_DIR)
-	install -m 0644 src/modules/CloudInit.pm $(PERL_INSTALL_DIR)
-	install -m 0644 src/modules/IMGDownload.pm $(PERL_INSTALL_DIR)
-	install -m 0644 src/modules/VMConfig.pm $(PERL_INSTALL_DIR)
+	install -m 0644 src/modules/*.pm $(PERL_INSTALL_DIR)
 	install -m 0755 src/cgv.pl $(INSTALL_DIR)/cgv
 	install -m 0755 cgvt $(INSTALL_DIR)
 

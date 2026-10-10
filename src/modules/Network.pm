@@ -7,7 +7,7 @@ use warnings;
 my $host_iface;
 
 my $dosu = VMConfig::get_sudo();
-sub check_iptables {
+sub iptables_rules_present {
     my $iptables_masq = 0;
     open MASQ, "$dosu iptables -t nat -L -n |" or die "$!";
     while (my $line = <MASQ>) {

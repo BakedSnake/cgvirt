@@ -1,6 +1,6 @@
 # TODO
-- [ ] Configure iptables in Perl
-- [ ] Configure firewall in Perl
+- [x] Configure iptables in Perl
+- [x] Configure firewall in Perl
 - [x] Replace virt-manage with our own implementation in C
   - [x] Listing domains
   - [x] Getting domain info

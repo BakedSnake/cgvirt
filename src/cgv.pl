@@ -42,6 +42,24 @@ sub prepare {
         print(STDOUT "USER: $username\n");
         print(STDOUT "CONFIG: $config_file\n\n");
     }
+
+    if (Network::fw_enabled()) {
+        if (! Network::fw_check_dns()) {
+            Network::fw_allow_dns();
+            print(STDOUT "added dns rule to firewall\n");
+        }
+
+        if (! Network::fw_check_dhcp()) {
+            Network::fw_allow_dhcp();
+            print(STDOUT "added dhcp rule to firewall\n");
+        }
+    }
+
+    if (! Network::iptables_rules_present()) {
+        Network::accept_forwarding();
+        Network::setup_postrouting();
+        print(STDOUT "iptables were updated\n");
+    }
     
     VMConfig::parse_config();
 }

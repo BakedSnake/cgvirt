@@ -17,7 +17,6 @@ void get_vcpu_xml(xmlTextWriterPtr w)
         xmlTextWriterWriteAttribute(w, BAD_CAST "placement", BAD_CAST "static");
         xmlTextWriterWriteString(w, BAD_CAST CPU);
     xmlTextWriterEndElement(w);
-
 }
 
 void get_nvram_path(const char *name)
@@ -109,8 +108,7 @@ const char* get_domain_xml(xmlBufferPtr buf)
 
             xmlTextWriterStartElement(w, BAD_CAST "devices");
 
-                xmlTextWriterWriteElement(w, BAD_CAST "emulator",
-                    BAD_CAST "/usr/bin/qemu-system-x86_64");
+                xmlTextWriterWriteElement(w, BAD_CAST "emulator", BAD_CAST "/usr/bin/qemu-system-x86_64");
 
                 xmlTextWriterStartElement(w, BAD_CAST "video");
                     xmlTextWriterStartElement(w, BAD_CAST "model");
@@ -129,8 +127,7 @@ const char* get_domain_xml(xmlBufferPtr buf)
                     xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "virtio-scsi");
                 xmlTextWriterEndElement(w);
 
-                xmlTextWriterStartElement(w, BAD_CAST "serial");
-                xmlTextWriterEndElement(w);
+                xmlTextWriterWriteElement(w, BAD_CAST "serial", BAD_CAST "");
 
                 xmlTextWriterStartElement(w, BAD_CAST "sound");
                     xmlTextWriterWriteAttribute(w, BAD_CAST "model", BAD_CAST "ich9");

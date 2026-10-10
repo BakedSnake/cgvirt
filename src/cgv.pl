@@ -139,17 +139,6 @@ sub create_vm_disk {
 
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
-    #my $virt_str = "$dosu virt-install --name $vm_name"
-    #. " --arch=$VMConfig::virtual_machine{arch}"
-    #. " --boot=$VMConfig::virtual_machine{boot}"
-    #. " --ram=$VMConfig::virtual_machine{ram}"
-    #. " --vcpus=$VMConfig::virtual_machine{cpu}"
-    #. " --disk path=$diskname,format=qcow2"
-    #. " --disk path=cidata.iso,device=cdrom"
-    #. " --os-variant=$vm_os"
-    #. " --network network=$VMConfig::virtual_machine{net},model=$VMConfig::virtual_machine{model}"
-    #. " --graphics $VMConfig::virtual_machine{graphics}"
-    #. " --noautoconsole --import |";
     my $virt_str = "cgvt -n $vm_name"
     . " --arch $VMConfig::virtual_machine{arch}"
     . " --cpu $VMConfig::virtual_machine{cpu}"
@@ -176,8 +165,6 @@ sub get_ip_address {
         open IP, "cgvt -i $vm_name |" or die "$!";
         while (my $line = <IP>) {
             if ($line =~ m/IP/) {
-                #print(STDOUT " Name     MAC address         Protocol   Address\n");
-                #print(STDOUT "-------------------------------------------------------------\n");
                 print(STDOUT "$line\n");
                 $found = 1;
             }

@@ -4,7 +4,6 @@ Quickly whip up a Cloud OS virtual machine with qemu and libvirt.
 #### Dependencies
 - qemu
 - libvirt
-- virt-manager
 - mkisofs (cdr-tools)
 
 #### Install
@@ -39,6 +38,7 @@ Note: These options assume you have a virtual network named default, and that it
 #### Usage
 ```bash
 $ cgv --interactive --create
+$ cgv --os=1 --create # Create Debian vm with all default values
 
 ```
 

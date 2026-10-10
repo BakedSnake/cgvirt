@@ -8,14 +8,19 @@ my $host_iface;
 
 my $dosu = VMConfig::get_sudo();
 sub check_iptables {
+    my $iptables_masq = 0;
     open MASQ, "$dosu iptables -t nat -L -n |" or die "$!";
     while (my $line = <MASQ>) {
-        if ($line =~ m/MASQUERADE/) {
+        # for now matching default qemu network
+        if ($line =~ m/MASQUERADE/ and $line =~ m/192.168.122.0/) {
             print(STDOUT "$line");
+            $iptables_masq = 1;
+            last;
         }
     }
 
     close(MASQ);
+    return $iptables_masq;
 }
 
 sub accept_forwarding {
@@ -43,12 +48,27 @@ sub setup_postrouting {
     close(POST);
 }
 
+sub fw_enabled {
+    my $enabled = 1;
+    open FW, "$dosu ufw status |" or die "$!";
+    while (my $line = <FW>) {
+        if ($line =~ m/Status: inactive/) {
+            $enabled = 0;
+            last;
+        }
+    }
+
+    close(FW);
+    return $enabled;
+}
+
 sub fw_check_dns {
     my $dns_status = 0;
     open FW, "$dosu ufw status |" or die "$!";
     while (my $line = <FW>) {
         if ($line =~ m/53 on virbr0/) {
             $dns_status = 1;
+            last;
         }
     }
 
@@ -71,6 +91,7 @@ sub fw_check_dhcp {
     while (my $line = <FW>) {
         if ($line =~ m|67/udp on virbr0|) {
             $dhcp_status = 1;
+            last;
         }
     }
 

@@ -43,4 +43,48 @@ sub setup_postrouting {
     close(POST);
 }
 
+sub fw_check_dns {
+    my $dns_status = 0;
+    open FW, "$dosu ufw status |" or die "$!";
+    while (my $line = <FW>) {
+        if ($line =~ m/53 on virbr0/) {
+            $dns_status = 1;
+        }
+    }
+
+    close(FW);
+    return $dns_status;
+}
+
+sub fw_allow_dns {
+    open FW, "$dosu ufw allow in on virbr0 to any port 53 |" or die "$!";
+    while (my $line = <FW>) {
+        print(STDOUT "$line");
+    }
+
+    close(FW);
+}
+
+sub fw_check_dhcp {
+    my $dhcp_status = 0;
+    open FW, "$dosu ufw status |" or die "$!";
+    while (my $line = <FW>) {
+        if ($line =~ m|67/udp on virbr0|) {
+            $dhcp_status = 1;
+        }
+    }
+
+    close(FW);
+    return $dhcp_status;
+}
+
+sub fw_allow_dhcp {
+    open FW, "$dosu ufw allow in on virbr0 to any port 67 proto udp |" or die "$!";
+    while (my $line = <FW>) {
+        print(STDOUT "$line");
+    }
+
+    close(FW);
+}
+
 1;

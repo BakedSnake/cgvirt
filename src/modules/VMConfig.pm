@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 our $username = $ENV{LOGNAME};
-our $config_file = "$ENV{HOME}/.config/cgvirt/cgvirt.conf";
+our $config_file = "$ENV{HOME}/.config/cobia/cobia.conf";
 
 our %virtual_machine = (
     arch        => "x86_64",

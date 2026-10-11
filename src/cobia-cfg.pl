@@ -7,10 +7,10 @@ use Getopt::Long;
 use POSIX qw(setuid waitpid);
 use File::Path qw( make_path );
 
-use CGVirt::VMConfig;
-use CGVirt::CloudInit;
-use CGVirt::IMGDownload;
-use CGVirt::Network;
+use Cobia::VMConfig;
+use Cobia::CloudInit;
+use Cobia::IMGDownload;
+use Cobia::Network;
 
 my $os_release  = VMConfig::get_os_release();
 my $username    = $VMConfig::username;
@@ -157,7 +157,7 @@ sub create_vm_disk {
 
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
-    my $virt_str = "cgvt -n $vm_name"
+    my $virt_str = "cobia -n $vm_name"
     . " --arch $VMConfig::virtual_machine{arch}"
     . " --cpu $VMConfig::virtual_machine{cpu}"
     . " --disk $vm_env/$diskname"
@@ -180,7 +180,7 @@ sub get_ip_address {
     my $found = 0;
     while (!$found) {
         sleep 5;
-        open IP, "cgvt -i $vm_name |" or die "$!";
+        open IP, "cobia -i $vm_name |" or die "$!";
         while (my $line = <IP>) {
             if ($line =~ m/IP/) {
                 print(STDOUT "$line\n");

@@ -4,21 +4,14 @@ package VMConfig;
 use strict;
 use warnings;
 
-our $username = $ENV{LOGNAME};
-our $config_file = "$ENV{HOME}/.config/cobia/cobia.conf";
+use YAML::Tiny;
 
-our %virtual_machine = (
-    arch        => "x86_64",
-    boot        => "uefi",
-    cpu         => "2",
-    graphics    => "spice",
-    model       => "virtio",
-    net         => "default",
-    ram         => "2096",
-    ssh_key     => "",
-    user        => "$username",
-    vm_dir      => ""
-);
+our %default_settings;
+our $username = $ENV{LOGNAME};
+our $config_file = "$ENV{HOME}/.config/cobia/cobia.yml";
+
+my $yaml = YAML::Tiny->read("$config_file");
+my $cfg = $yaml->[0];
 
 sub get_os_release {
     my $os_release;
@@ -37,24 +30,16 @@ sub get_os_release {
 }
 
 sub parse_config {
-    open CONFIG, "< $config_file" or die "Could not open file: $!";
-    while (my $line = <CONFIG>) {
-        foreach my $key (keys %virtual_machine) {
-            if ($line =~ qr/^$key/) {
-                my @parts;
-                if ($line =~ qr/ = /) {
-                    @parts = split(" = ", $line);
-                } else {
-                    @parts = split("=", $line);
-                }
-    
-                chomp $parts[1];
-                $virtual_machine{$key} = $parts[1];
-            }
-        }
-    }
-
-    close CONFIG;
+    $default_settings{arch}        = $cfg->[2]->{arch};
+    $default_settings{boot}        = $cfg->[2]->{boot};
+    $default_settings{cpu}         = $cfg->[2]->{cpu};
+    $default_settings{graphics}    = $cfg->[2]->{graphics};
+    $default_settings{model}       = $cfg->[2]->{model};
+    $default_settings{net}         = $cfg->[2]->{net};
+    $default_settings{ram}         = $cfg->[2]->{ram};
+    $default_settings{ssh_key}     = $cfg->[1]->{ssh_key};
+    $default_settings{user}        = $cfg->[1]->{user};
+    $default_settings{vm_dir}      = $cfg->[0]->{vm_dir};
 }
 
 sub get_sudo {

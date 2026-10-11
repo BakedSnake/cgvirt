@@ -16,4 +16,5 @@
 - [ ] Implement management via yaml files
   - [ ] XML validation
   - [ ] YAML validation
+  - [x] YAML config file ( Perl )
 

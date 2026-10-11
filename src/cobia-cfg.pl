@@ -31,6 +31,7 @@ my $ssh_key;
 my $dosu;
 my $interactive;
 my $debug;
+my $netconf;
 
 my $create;
 my $delete;
@@ -43,28 +44,32 @@ sub prepare {
         print(STDOUT "CONFIG: $config_file\n\n");
     }
 
-    if (Network::fw_enabled()) {
-        if (! Network::fw_check_dns()) {
-            Network::fw_allow_dns();
-            print(STDOUT "added dns rule to firewall\n");
-        }
-
-        if (! Network::fw_check_dhcp()) {
-            Network::fw_allow_dhcp();
-            print(STDOUT "added dhcp rule to firewall\n");
-        }
-    }
-
-    if (! Network::iptables_rules_present()) {
-        Network::accept_forwarding();
-        Network::setup_postrouting();
-        print(STDOUT "iptables were updated\n");
-    }
-    
     VMConfig::parse_config();
 }
 
 sub configure {
+    if ($netconf) {
+        if (Network::fw_enabled()) {
+            if (! Network::fw_check_dns()) {
+                Network::fw_allow_dns();
+                print(STDOUT "added dns rule to firewall\n");
+            }
+
+            if (! Network::fw_check_dhcp()) {
+                Network::fw_allow_dhcp();
+                print(STDOUT "added dhcp rule to firewall\n");
+            }
+        }
+
+        if (! Network::iptables_rules_present()) {
+            Network::accept_forwarding();
+            Network::setup_postrouting();
+            print(STDOUT "iptables were updated\n");
+        }
+
+        exit(0);
+    }
+    
     if ($vm_image_choice) {
         if ($vm_image_choice == 1) {
             $vm_os = "debian13";
@@ -108,7 +113,7 @@ sub configure {
     }
     
     ## Create VM env
-    $vm_env = "$VMConfig::virtual_machine{vm_dir}/$vm_name";
+    $vm_env = "$VMConfig::default_settings{vm_dir}/$vm_name";
     my @vm_path = make_path("$vm_env", {
         verbose => 0,
         mode => 0777,
@@ -121,7 +126,7 @@ sub configure {
     ## Display Configuration
     print(STDOUT ">>> Using the following configuration:\n");
     print(STDOUT "  name => $vm_name\n");
-    while (my ($key, $val) = each %VMConfig::virtual_machine) {
+    while (my ($key, $val) = each %VMConfig::default_settings) {
         print(STDOUT "  $key => $val\n");
     }
 
@@ -158,14 +163,14 @@ sub create_vm_disk {
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
     my $virt_str = "cobia -n $vm_name"
-    . " --arch $VMConfig::virtual_machine{arch}"
-    . " --cpu $VMConfig::virtual_machine{cpu}"
+    . " --arch $VMConfig::default_settings{arch}"
+    . " --cpu $VMConfig::default_settings{cpu}"
     . " --disk $vm_env/$diskname"
     . " --cd $vm_env/cidata.iso"
-    . " --net $VMConfig::virtual_machine{net}"
-    . " --model $VMConfig::virtual_machine{model}"
-    . " --graphics $VMConfig::virtual_machine{graphics}"
-    . " --memory $VMConfig::virtual_machine{ram}"
+    . " --net $VMConfig::default_settings{net}"
+    . " --model $VMConfig::default_settings{model}"
+    . " --graphics $VMConfig::default_settings{graphics}"
+    . " --memory $VMConfig::default_settings{ram}"
     . " --create |";
     
     open VIRT, $virt_str or die "$!";
@@ -216,26 +221,27 @@ sub main {
 
 prepare();
 GetOptions(
-    "arch=s"        => \$VMConfig::virtual_machine{arch},
-    "boot=s"        => \$VMConfig::virtual_machine{boot},
-    "cpu=s"         => \$VMConfig::virtual_machine{cpu},
-    "graphics=s"    => \$VMConfig::virtual_machine{graphics},
+    "arch=s"        => \$VMConfig::default_settings{arch},
+    "boot=s"        => \$VMConfig::default_settings{boot},
+    "cpu=s"         => \$VMConfig::default_settings{cpu},
+    "graphics=s"    => \$VMConfig::default_settings{graphics},
     "hostname=s"    => \$hostname,
-    "model=s"       => \$VMConfig::virtual_machine{model},
+    "model=s"       => \$VMConfig::default_settings{model},
     "name=s"        => \$vm_name,
-    "net=s"         => \$VMConfig::virtual_machine{net},
+    "net=s"         => \$VMConfig::default_settings{net},
     "os=s"          => \$vm_image_choice,
-    "ram=s"         => \$VMConfig::virtual_machine{ram},
+    "ram=s"         => \$VMConfig::default_settings{ram},
     "size=s"        => \$disksize,
-    "sshkey=s"      => \$VMConfig::virtual_machine{ssh_key},
-    "username=s"    => \$VMConfig::virtual_machine{user},
+    "sshkey=s"      => \$VMConfig::default_settings{ssh_key},
+    "username=s"    => \$VMConfig::default_settings{user},
 
     "create"        => \$create,
     "debug"         => \$debug,
     "delete"        => \$delete,
     "interactive=s" => \$interactive,
+    "netconf"       => \$netconf,
 );
 
-if ($create) {
+if ($create or $netconf) {
     main();
 }

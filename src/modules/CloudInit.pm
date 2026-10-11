@@ -6,7 +6,7 @@ use warnings;
 
 sub get_pubkey {
     my $u_key; 
-    open KEY, "< $VMConfig::virtual_machine{ssh_key}" or die "$!";
+    open KEY, "< $VMConfig::default_settings{ssh_key}" or die "$!";
     while (my $line = <KEY>) {
         $u_key = "$line\n";
     }
@@ -25,7 +25,7 @@ sub configure {
     print(USERD "#cloud-config
 
 users:
-  - name: $VMConfig::virtual_machine{user}
+  - name: $VMConfig::default_settings{user}
     lock_passwd: False
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo

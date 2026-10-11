@@ -1,0 +1,16 @@
+---
+- name: Domain Directory
+  vm_dir:
+
+- name: User Settings
+  user:
+  ssh_key:
+
+- name: Default Settings
+  arch: "x86_64"
+  boot: "uefi"
+  cpu: "2"
+  graphics: "spice"
+  model: "virtio"
+  net: "default"
+  ram: "2096"

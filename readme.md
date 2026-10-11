@@ -5,6 +5,8 @@ Quickly whip up a Cloud OS virtual machine with qemu and libvirt.
 - qemu
 - libvirt
 - mkisofs (cdr-tools)
+- libwww-curl-perl
+- libyaml-tiny-perl
 
 #### Install
 Default location is **/usr/local/bin**. ( The current make file is broken and needs to be updated. ).

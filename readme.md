@@ -13,6 +13,7 @@ $ make
 $ make install
 $ make uninstall
 $ make clean
+
 ```
 
 #### Configuration
@@ -24,13 +25,16 @@ Can be configured on **~/.config/cgvirt/cgvirt.conf**.
 
 ```
 
-Default values for virt-install.
+Default values for vm install.
 ```bash
 ram = 2048
 cpu = 4
 net = default
 model = virtio
 graphics = spice
+boot = uefi
+arch = x86_64
+
 ```
 
 Note: These options assume you have a virtual network named default, and that it is enabled.
@@ -38,7 +42,10 @@ Note: These options assume you have a virtual network named default, and that it
 #### Usage
 ```bash
 $ cgv --interactive --create
-$ cgv --os=1 --create # Create Debian vm with all default values
+$ cgv --os=1 --create           # Create Debian vm with all default values
+$ cgvt -l domains               # List domains
+$ cgvt -l networks              # List networks
+$ cgvt -i <vm name>             # Show vm info
 
 ```
 

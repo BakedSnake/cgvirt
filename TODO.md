@@ -7,7 +7,7 @@
   - [x] Creating a domain
   - [x] Deliging a domain
 - [ ] Manage Networks
-  - [ ] List networks
+  - [x] List networks
   - [ ] Get network info
   - [ ] Create a network
   - [ ] Delete a network

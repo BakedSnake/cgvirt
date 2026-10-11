@@ -2,6 +2,7 @@
 #include <libvirt/libvirt.h>
 
 extern int TOTAL_VM_COUNT;
+extern int TOTAL_NET_COUNT;
 
 extern char *NAME;
 extern char *ARCH;
@@ -128,6 +129,8 @@ typedef struct Channel {
     char *alias_name;
 } Channel;
 
+virNetworkPtr *get_all_networks(virConnectPtr conn);
+
 virDomainPtr *get_all_domains(virConnectPtr conn);
 
 virDomainPtr get_domain(virConnectPtr conn, char *name);
@@ -135,6 +138,8 @@ virDomainPtr get_domain(virConnectPtr conn, char *name);
 void show_domains(virConnectPtr conn);
 
 void show_vm_info(char *name, virConnectPtr conn);
+
+void show_networks(virConnectPtr conn);
 
 void start_domain(virConnectPtr conn, const char *name);
 
@@ -144,11 +149,13 @@ void delete_domain(virConnectPtr conn, const char *name);
 
 void create_domain(virConnectPtr conn);
 
+
+
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
   {"version",           no_argument,            0, 'v'},
   {"create",            no_argument,            0, 'x'},
-  {"list",              no_argument,            0, 'l'},
+  {"list",              required_argument,      0, 'l'},
   {"start",             required_argument,      0, 's'},
   {"stop",              required_argument,      0, 'q'},
   {"delete",            required_argument,      0, 'X'},

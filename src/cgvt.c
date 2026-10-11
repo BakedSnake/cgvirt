@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
-#include <libxml/xmlwriter.h>
 
 #include "cgvt.h"
 #include "xml.h"
 
 int TOTAL_VM_COUNT = 0;
+int TOTAL_NET_COUNT = 0;
 
 char *NAME = NULL;
 char *ARCH = NULL;
@@ -22,7 +22,7 @@ char NVRAM[256] = { 0 };
 int argHandle(virConnectPtr conn, int argc, char* argv[])
 {
     int opt;
-    const char * arg_str = "hvli:a:b:c:d:g:r:m:n:w:o:s:q:O:X:x";
+    const char * arg_str = "hvl:i:a:b:c:d:g:r:m:n:w:o:s:q:O:X:x";
     while ((opt = getopt_long(argc, argv, arg_str, options, NULL)) != -1) {
         switch (opt) {
             case 'h':
@@ -60,9 +60,12 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
                 CD = optarg;
                 break;
             case 'l':
-                fprintf(stdout, "List:\n");
-                show_domains(conn);
-                fprintf(stdout, "\n");
+                if (strcmp(optarg, "domains") == 0) {
+                    show_domains(conn);
+                }
+                if (strcmp(optarg, "networks") == 0) {
+                    show_networks(conn);
+                }
                 return 0;
             case 'i':
                 fprintf(stdout, "%s:\n", optarg);
@@ -189,6 +192,7 @@ void show_domains(virConnectPtr conn)
 {
     virDomainPtr *doms = get_all_domains(conn);
     if (doms != NULL) {
+        fprintf(stdout, "Domain List:\n");
         for (int i = 0; i < TOTAL_VM_COUNT; ++i) {
             if (doms[i]) {
                 const char *name = virDomainGetName(doms[i]);
@@ -227,6 +231,30 @@ void show_vm_info(char *name, virConnectPtr conn)
 
 
             virDomainFree(dom);
+        }
+    }
+}
+
+virNetworkPtr *get_all_networks(virConnectPtr conn)
+{
+    virNetworkPtr *networks = NULL;
+    TOTAL_NET_COUNT = virConnectListAllNetworks(conn, &networks, 0);
+    if (TOTAL_NET_COUNT > 0) {
+        return networks;
+    }
+
+    return NULL;
+}
+
+void show_networks(virConnectPtr conn)
+{
+    virNetworkPtr *networks = get_all_networks(conn);
+    if (networks != NULL) {
+        fprintf(stdout, "Network List:\n");
+        for (int i = 0; i < TOTAL_NET_COUNT; ++i) {
+            if (networks[i]) {
+                fprintf(stdout, "  - %s\n", virNetworkGetName(networks[i]));
+            }
         }
     }
 }

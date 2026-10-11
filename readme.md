@@ -17,7 +17,7 @@ $ make clean
 ```
 
 #### Configuration
-Can be configured on **~/.config/cgvirt/cgvirt.conf**.
+Can be configured on **~/.config/cobia/cobia.conf**.
 ```vimwiki
 - vms_dir -> Directory to install virtual machines
 - user -> Name of  VM user that will be created on install

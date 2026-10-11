@@ -129,6 +129,8 @@ typedef struct Channel {
     char *alias_name;
 } Channel;
 
+int argHandle(virConnectPtr conn, int argc, char* argv[]);
+
 virNetworkPtr *get_all_networks(virConnectPtr conn);
 
 virDomainPtr *get_all_domains(virConnectPtr conn);
@@ -148,8 +150,6 @@ void stop_domain(virConnectPtr conn, const char *name);
 void delete_domain(virConnectPtr conn, const char *name);
 
 void create_domain(virConnectPtr conn);
-
-
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},

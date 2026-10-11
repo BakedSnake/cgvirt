@@ -41,11 +41,11 @@ Note: These options assume you have a virtual network named default, and that it
 
 #### Usage
 ```bash
-$ cgv --interactive --create
-$ cgv --os=1 --create           # Create Debian vm with all default values
-$ cgvt -l domains               # List domains
-$ cgvt -l networks              # List networks
-$ cgvt -i <vm name>             # Show vm info
+$ cobia-cfg --interactive --create
+$ cobia-cfg --os=1 --create             # Create Debian vm with all default values
+$ cobia -l domains                      # List domains
+$ cobia -l networks                     # List networks
+$ cobia -i <vm name>                    # Show vm info
 
 ```
 

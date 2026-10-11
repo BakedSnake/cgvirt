@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "cgvt.h"
+#include "cobia.h"
 #include "xml.h"
 
 void get_mem_xml(xmlTextWriterPtr w)

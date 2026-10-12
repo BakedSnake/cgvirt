@@ -19,11 +19,9 @@ my $config_file = $VMConfig::config_file;
 my $uid;
 my $gid;
 my $vm_env;
-my $vm_name;
 my $vm_os;
 my $vm_image_choice = 1;
 my %vm_image_urls;
-my $diskname;
 my $ssh_key;
 
 my $dosu;
@@ -90,13 +88,13 @@ sub configure {
 
     if ($interactive) {
         print(STDOUT "\nVM Name: ");
-        $vm_name = <STDIN>;
-        chomp $vm_name;
+        $VMConfig::default_settings{name} = <STDIN>;
+        chomp $VMConfig::default_settings{name};
         print(STDOUT "\nVM Hostname: ");
         $VMConfig::default_settings{hostname} = <STDIN>;
         chomp $VMConfig::default_settings{hostname};
     } else {
-        if (! $vm_name) {
+        if ($VMConfig::default_settings{name} eq "") {
             my $date;
             open DATE, "date -u +%s |" or die "$!";
             while (my $line = <DATE>) {
@@ -104,15 +102,15 @@ sub configure {
             }
 
             chomp $date;
-            $vm_name = "$vm_os"."-$date";
+            $VMConfig::default_settings{name} = "$vm_os"."-$date";
             close DATE;
         }
 
-        $VMConfig::default_settings{hostname} = $vm_name;
+        $VMConfig::default_settings{hostname} = $VMConfig::default_settings{name};
     }
     
     ## Create VM env
-    $vm_env = "$VMConfig::default_settings{vm_dir}/$vm_name";
+    $vm_env = "$VMConfig::default_settings{vm_dir}/$VMConfig::default_settings{name}";
     my @vm_path = make_path("$vm_env", {
         verbose => 0,
         mode => 0777,
@@ -125,7 +123,7 @@ sub configure {
     ## Display Configuration
     if ($debug) {
         print(STDOUT ">>> Using the following configuration:\n");
-        print(STDOUT "  name => $vm_name\n");
+        print(STDOUT "  name => $VMConfig::default_settings{name}\n");
         while (my ($key, $val) = each %VMConfig::default_settings) {
             print(STDOUT "  $key => $val\n");
         }
@@ -136,7 +134,7 @@ sub configure {
 }
 
 sub create_vm_disk {
-    $diskname = "$vm_name.qcow2";
+    my $diskname = "$VMConfig::default_settings{name}.qcow2";
     my $disksize = $VMConfig::default_settings{disksize};
     print(STDOUT ">>> Enter Disk Size ( in GBs ): ");
     if ($interactive or $disksize eq "") {
@@ -163,31 +161,35 @@ sub create_vm_disk {
 }
 
 sub write_vm_yaml {
+    $VMConfig::default_settings{cd} = "$vm_env/$VMConfig::default_settings{cd}";
+    $VMConfig::default_settings{disk} = "$vm_env/$VMConfig::default_settings{disk}";
+    $VMConfig::default_settings{vm_dir} = "$vm_env";
+
     my @vm = (
         arch        => $VMConfig::default_settings{arch},
         boot        => $VMConfig::default_settings{boot},
-        cd          => "$vm_env/$VMConfig::default_settings{cd}",
+        cd          => $VMConfig::default_settings{cd},
         cpu         => $VMConfig::default_settings{cpu},
-        disk        => "$vm_env/$diskname",
+        disk        => $VMConfig::default_settings{disk},
         graphics    => $VMConfig::default_settings{graphics},
         model       => $VMConfig::default_settings{model},
-        name        => $vm_name,
+        name        => $VMConfig::default_settings{name},
         net         => $VMConfig::default_settings{net},
         ram         => $VMConfig::default_settings{ram},
         ssh_key     => $VMConfig::default_settings{ssh_key},
         user        => $VMConfig::default_settings{user},
-        vm_dir      => $vm_env
+        vm_dir      => $VMConfig::default_settings{vm_dir}
     );
 
     my $vm_yaml = YAML::Tiny->new;
     $vm_yaml->[0]->{domain} = { @vm };
-    my $filename = "$vm_name".".yml";
+    my $filename = "$VMConfig::default_settings{name}".".yml";
     $vm_yaml->write( $filename );
 }
 
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
-    my $virt_str = "cobia -c $vm_env/$vm_name.yml |";
+    my $virt_str = "cobia -c $vm_env/$VMConfig::default_settings{name}.yml |";
 
     open VIRT, $virt_str or die "$!";
     while (my $line= <VIRT>) {
@@ -202,7 +204,7 @@ sub get_ip_address {
     my $found = 0;
     while (!$found) {
         sleep 5;
-        open IP, "cobia -i $vm_name |" or die "$!";
+        open IP, "cobia -i $VMConfig::default_settings{name} |" or die "$!";
         while (my $line = <IP>) {
             if ($line =~ m/IP/) {
                 print(STDOUT "$line\n");

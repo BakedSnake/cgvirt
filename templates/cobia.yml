@@ -11,8 +11,13 @@
   boot: "uefi"
   cd: cidata.iso
   cpu: "2"
-  disk: disk.qcow2
+  disk:
+    name: disk.qcow2
+    size: "40"
   graphics: "spice"
+  hostname: hostname
   model: "virtio"
   net: "default"
   ram: "2096"
+  vm:
+    name: ""

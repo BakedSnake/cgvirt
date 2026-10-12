@@ -9,15 +9,24 @@ use YAML::Tiny;
 use Cobia::VMConfig;
 
 sub select_image {
-    my $interactive = $_[1];
+    my $interactive = $_[0];
 
     VMConfig::get_os_images_urls();
     print(STDOUT "\n>>> Choose OS:\n");
-    printf(STDOUT "  1. Debian\n  2. Gentoo ( arm64 )\n  3. Gentoo ( amd64 )\n  4. OpenSuse\n  5. Ubuntu Noble\n  6. Ubuntu Focal\n\n  Your answer: ");
+    my $count = 0;
+    for my $name (@VMConfig::os_img_names) {
+        if ($count != 0) {
+            printf(STDOUT "  ${count}. $name\n");
+        }
+
+        $count++;
+    }
+
     if ($interactive or $VMConfig::vm_image_choice eq "") {
+        print(STDOUT "\n  Select OS image: ");
         $VMConfig::vm_image_choice = <STDIN>;
         chomp $VMConfig::vm_image_choice;
-    } else { print(STDOUT "$VMConfig::vm_image_choice\n"); }
+    } else { print(STDOUT "\n  Your choice: $VMConfig::vm_image_choice\n"); }
 
     if ($VMConfig::vm_image_choice == "1") {
         print(STDOUT "\n>>> Downloading: Debian Trixie\n\n  - $VMConfig::os_img_urls[1]\n\n");
@@ -37,7 +46,7 @@ sub select_image {
 sub get_disk_image {
     my $memory;
     my $curl = WWW::Curl::Easy->new;
-    my $url = $VMConfig::os_img_urls[$VMConfig::vm_image_choice]
+    my $url = $VMConfig::os_img_urls[$VMConfig::vm_image_choice];
 
     $curl->setopt(CURLOPT_HEADER, 0);
     $curl->setopt(CURLOPT_URL, $url);

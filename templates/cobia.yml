@@ -1,10 +1,10 @@
 ---
 - name: Domain Directory
-  vm_dir:
+  vm_dir: ""
 
 - name: User Settings
-  user:
-  ssh_key:
+  user: ""
+  ssh_key: ""
 
 - name: Default Settings
   arch: "x86_64"
@@ -13,11 +13,27 @@
   cpu: "2"
   disk:
     name: disk.qcow2
-    size: "40"
+    size: "40" # size in gb
   graphics: "spice"
-  hostname: hostname
+  hostname: ""
   model: "virtio"
   net: "default"
   ram: "2096"
   vm:
     name: ""
+
+- name: OS Cloud Images
+  count: 6
+  images:
+    - name: Debian
+      url: "https://chuangtzu.ftp.acc.umu.se/images/cloud/trixie/20260914-2601/debian-13-generic-amd64-20260914-2601.qcow2"
+    - name: Gentoo ( amd64 )
+      url: "https://distfiles.gentoo.org/releases/amd64/autobuilds/20261004T164559Z/di-amd64-cloudinit-20261004T164559Z.qcow2"
+    - name: Gentoo ( arm64 )
+      url: "https://distfiles.gentoo.org/releases/amd64/autobuilds/current-di-amd64-console/di-amd64-console-20260927T170058Z.qcow2"
+    - name: OpenSuse
+      url: "https://download.opensuse.org/distribution/openSUSE-stable/appliances/Leap-16.0-Minimal-VM.x86_64-Cloud.qcow2"
+    - name: Ubuntu ( noble )
+      url: "https://cloud-images.ubuntu.com/noble/20260926/noble-server-cloudimg-amd64.img"
+    - name: Debian ( focal )
+      url: "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"

@@ -11,6 +11,7 @@ our $username = $ENV{LOGNAME};
 our $config_file = "$ENV{HOME}/.config/cobia/cobia.yml";
 
 our @os_img_urls;
+our @os_img_names;
 our $vm_image_choice = 1;
 
 my $yaml = YAML::Tiny->read("$config_file");
@@ -51,12 +52,13 @@ sub parse_config {
 }
 
 sub get_os_images_urls {
-    my $is = $cfg->[3]->{images};
+    my $imgs = $cfg->[3]->{images};
     my $len = $cfg->[3]->{count};
 
     if ($len > 0) {
         for (my $i = 0; $i < $len; $i++) {
-            $os_img_urls[$i+1] = $is->[$i];
+            $os_img_urls[$i+1] = $imgs->[$i]->{url};
+            $os_img_names[$i+1] = $imgs->[$i]->{name};
         }
     }
 }

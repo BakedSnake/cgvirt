@@ -33,6 +33,7 @@ my $interactive;
 my $debug;
 my $netconf;
 
+my $apply;
 my $create;
 my $delete;
 
@@ -228,9 +229,16 @@ sub main {
     CloudInit::create_cidata();
 
     ## Create VM
-    write_vm_yaml();
-    create_virtual_machine();
-    get_ip_address();
+    if ($apply) {
+        write_vm_yaml();
+    }
+
+    if ($create) {
+        write_vm_yaml();
+        create_virtual_machine();
+        get_ip_address();
+    }
+
     return 1;
 }
 
@@ -254,10 +262,11 @@ GetOptions(
     "debug"         => \$debug,
     "delete"        => \$delete,
     "netconf"       => \$netconf,
+    "apply"         => \$apply,
 
     "interactive=s" => \$interactive,
 );
 
-if ($create or $netconf) {
+if ($apply or $create or $netconf) {
     main();
 }

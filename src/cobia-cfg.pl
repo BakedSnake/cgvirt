@@ -123,10 +123,12 @@ sub configure {
     chown($uid, $gid, $vm_env);
 
     ## Display Configuration
-    print(STDOUT ">>> Using the following configuration:\n");
-    print(STDOUT "  name => $vm_name\n");
-    while (my ($key, $val) = each %VMConfig::default_settings) {
-        print(STDOUT "  $key => $val\n");
+    if ($debug) {
+        print(STDOUT ">>> Using the following configuration:\n");
+        print(STDOUT "  name => $vm_name\n");
+        while (my ($key, $val) = each %VMConfig::default_settings) {
+            print(STDOUT "  $key => $val\n");
+        }
     }
 
     ## Select Cloud image OS

@@ -23,9 +23,7 @@ my $vm_name;
 my $vm_os;
 my $vm_image_choice = 1;
 my %vm_image_urls;
-my $hostname;
 my $diskname;
-my $disksize = 40;
 my $ssh_key;
 
 my $dosu;
@@ -95,8 +93,8 @@ sub configure {
         $vm_name = <STDIN>;
         chomp $vm_name;
         print(STDOUT "\nVM Hostname: ");
-        $hostname = <STDIN>;
-        chomp $hostname;
+        $VMConfig::default_settings{hostname} = <STDIN>;
+        chomp $VMConfig::default_settings{hostname};
     } else {
         if (! $vm_name) {
             my $date;
@@ -110,7 +108,7 @@ sub configure {
             close DATE;
         }
 
-        $hostname = $vm_name;
+        $VMConfig::default_settings{hostname} = $vm_name;
     }
     
     ## Create VM env
@@ -137,6 +135,7 @@ sub configure {
 
 sub create_vm_disk {
     $diskname = "$vm_name.qcow2";
+    my $disksize = $VMConfig::default_settings{disksize};
     print(STDOUT ">>> Enter Disk Size ( in GBs ): ");
     if ($interactive or $disksize eq "") {
         $disksize = <STDIN>;
@@ -225,7 +224,7 @@ sub main {
     
     ## Cloud Init Config
     $ssh_key = CloudInit::get_pubkey();
-    CloudInit::configure($username,$hostname,$ssh_key);
+    CloudInit::configure($username,$VMConfig::default_settings{hostname},$ssh_key);
     CloudInit::create_cidata();
 
     ## Create VM
@@ -248,13 +247,13 @@ GetOptions(
     "boot=s"        => \$VMConfig::default_settings{boot},
     "cpu=s"         => \$VMConfig::default_settings{cpu},
     "graphics=s"    => \$VMConfig::default_settings{graphics},
-    "hostname=s"    => \$hostname,
+    "hostname=s"    => \$VMConfig::default_settings{hostname},
     "model=s"       => \$VMConfig::default_settings{model},
-    "name=s"        => \$vm_name,
+    "name=s"        => \$VMConfig::default_settings{name},
     "net=s"         => \$VMConfig::default_settings{net},
     "os=s"          => \$vm_image_choice,
     "ram=s"         => \$VMConfig::default_settings{ram},
-    "size=s"        => \$disksize,
+    "size=s"        => \$VMConfig::default_settings{disksize},
     "sshkey=s"      => \$VMConfig::default_settings{ssh_key},
     "username=s"    => \$VMConfig::default_settings{user},
 

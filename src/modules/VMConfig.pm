@@ -34,9 +34,12 @@ sub parse_config {
     $default_settings{boot}        = $cfg->[2]->{boot};
     $default_settings{cd}          = $cfg->[2]->{cd};
     $default_settings{cpu}         = $cfg->[2]->{cpu};
-    $default_settings{disk}        = $cfg->[2]->{disk};
+    $default_settings{disk}        = $cfg->[2]->{disk}->{name};
+    $default_settings{disksize}    = $cfg->[2]->{disk}->{size};
     $default_settings{graphics}    = $cfg->[2]->{graphics};
+    $default_settings{hostname}    = $cfg->[2]->{hostname};
     $default_settings{model}       = $cfg->[2]->{model};
+    $default_settings{name}        = $cfg->[2]->{vm}->{name};
     $default_settings{net}         = $cfg->[2]->{net};
     $default_settings{ram}         = $cfg->[2]->{ram};
     $default_settings{ssh_key}     = $cfg->[1]->{ssh_key};

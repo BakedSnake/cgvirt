@@ -45,6 +45,8 @@ Note: These options assume you have a virtual network named default, and that it
 ```bash
 $ cobia-cfg --interactive --create
 $ cobia-cfg --os=1 --create             # Create Debian vm with all default values
+$ cobia-cfg --os=1 --apply              # Create Debian domain yaml file
+$ cobia -c /path/to/domain/file.yml     # Create vm from domain yaml file
 $ cobia -l domains                      # List domains
 $ cobia -l networks                     # List networks
 $ cobia -i <vm name>                    # Show vm info

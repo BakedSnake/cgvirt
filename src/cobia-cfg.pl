@@ -20,8 +20,6 @@ my $uid;
 my $gid;
 my $vm_env;
 my $vm_os;
-my $vm_image_choice = 1;
-my %vm_image_urls;
 my $ssh_key;
 
 my $dosu;
@@ -67,16 +65,16 @@ sub configure {
         exit(0);
     }
     
-    if ($vm_image_choice) {
-        if ($vm_image_choice == 1) {
+    if ($VMConfig::vm_image_choice) {
+        if ($VMConfig::vm_image_choice == 1) {
             $vm_os = "debian13";
-        } elsif ($vm_image_choice == 2) {
+        } elsif ($VMConfig::vm_image_choice == 2) {
             $vm_os = "gentoo";
-        } elsif ($vm_image_choice == 3) {
+        } elsif ($VMConfig::vm_image_choice == 3) {
             $vm_os = "gentoo";
-        } elsif ($vm_image_choice == 4) {
+        } elsif ($VMConfig::vm_image_choice == 4) {
             $vm_os = "opensuse16.0";
-        } elsif ($vm_image_choice == 5) {
+        } elsif ($VMConfig::vm_image_choice == 5) {
             $vm_os = "ubuntu24.04";
         } else {
             $vm_os = "ubuntu20.04";
@@ -130,7 +128,7 @@ sub configure {
     }
 
     ## Select Cloud image OS
-    ($vm_image_choice, %vm_image_urls) = IMGDownload::select_image($vm_image_choice,$interactive);
+    $VMConfig::vm_image_choice = IMGDownload::select_image($interactive);
 }
 
 sub create_vm_disk {
@@ -223,7 +221,7 @@ sub main {
 
     ## Get Cloud image
     chdir($vm_env);
-    IMGDownload::get_disk_image($vm_image_urls{$vm_image_choice});
+    IMGDownload::get_disk_image();
     create_vm_disk();
     
     ## Cloud Init Config
@@ -255,7 +253,7 @@ GetOptions(
     "model=s"       => \$VMConfig::default_settings{model},
     "name=s"        => \$VMConfig::default_settings{name},
     "net=s"         => \$VMConfig::default_settings{net},
-    "os=s"          => \$vm_image_choice,
+    "os=s"          => \$VMConfig::vm_image_choice,
     "ram=s"         => \$VMConfig::default_settings{ram},
     "size=s"        => \$VMConfig::default_settings{disksize},
     "sshkey=s"      => \$VMConfig::default_settings{ssh_key},

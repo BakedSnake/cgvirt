@@ -16,6 +16,11 @@ extern char *MODEL;
 extern char *GRAPHICS;
 extern char NVRAM[256];
 
+typedef struct {
+    const char *key;
+    char **dest;
+} key_map_t;
+
 typedef struct Feature {
     char *enabled;
     char *name;

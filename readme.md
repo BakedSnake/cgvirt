@@ -9,13 +9,12 @@ Quickly whip up a Cloud OS virtual machine with qemu and libvirt.
 - libyaml-tiny-perl
 
 #### Install
-Default location is **/usr/local/bin**. ( The current make file is broken and needs to be updated. ).
+Default location is **/usr/local/bin**.
 ```bash
 $ make
 $ make install
 $ make uninstall
 $ make clean
-
 ```
 
 #### Configuration
@@ -24,7 +23,6 @@ Can be configured on **~/.config/cobia/cobia.conf**.
 - vms_dir -> Directory to install virtual machines
 - user -> Name of  VM user that will be created on install
 - ssh_key -> Full path to your chosen ssh .pub key
-
 ```
 
 Default values for vm install.
@@ -37,7 +35,6 @@ Default values for vm install.
   model: "virtio"
   net: "default"
   ram: "2048"
-
 ```
 
 Note: These options assume you have a virtual network named default, and that it is enabled.
@@ -49,6 +46,5 @@ $ cobia-cfg --os=1 --create             # Create Debian vm with all default valu
 $ cobia -l domains                      # List domains
 $ cobia -l networks                     # List networks
 $ cobia -i <vm name>                    # Show vm info
-
 ```
 

@@ -28,14 +28,15 @@ Can be configured on **~/.config/cobia/cobia.conf**.
 ```
 
 Default values for vm install.
-```bash
-ram = 2048
-cpu = 4
-net = default
-model = virtio
-graphics = spice
-boot = uefi
-arch = x86_64
+```yaml
+- name: Default Settings
+  arch: "x86_64"
+  boot: "uefi"
+  cpu: "2"
+  graphics: "spice"
+  model: "virtio"
+  net: "default"
+  ram: "2048"
 
 ```
 

@@ -160,6 +160,27 @@ sub create_vm_disk {
     chown($uid, $gid, $diskname);
 }
 
+sub write_vm_yaml {
+    my @vm = (
+        arch        => $VMConfig::default_settings{arch},
+        boot        => $VMConfig::default_settings{boot},
+        cpu         => $VMConfig::default_settings{cpu},
+        graphics    => $VMConfig::default_settings{graphics},
+        model       => $VMConfig::default_settings{model},
+        name        => $vm_name,
+        net         => $VMConfig::default_settings{net},
+        ram         => $VMConfig::default_settings{ram},
+        ssh_key     => $VMConfig::default_settings{ssh_key},
+        user        => $VMConfig::default_settings{user},
+        vm_dir      => $vm_env
+    );
+
+    my $vm_yaml = YAML::Tiny->new;
+    $vm_yaml->[0]->{domain} = { @vm };
+    my $filename = "$vm_name".".yml";
+    $vm_yaml->write( $filename );
+}
+
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
     my $virt_str = "cobia -n $vm_name"
@@ -213,7 +234,7 @@ sub main {
     CloudInit::create_cidata();
 
     ## Create VM
-    $dosu = VMConfig::get_sudo();
+    write_vm_yaml();
     create_virtual_machine();
     get_ip_address();
     return 1;
@@ -238,8 +259,9 @@ GetOptions(
     "create"        => \$create,
     "debug"         => \$debug,
     "delete"        => \$delete,
-    "interactive=s" => \$interactive,
     "netconf"       => \$netconf,
+
+    "interactive=s" => \$interactive,
 );
 
 if ($create or $netconf) {

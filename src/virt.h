@@ -1,6 +1,6 @@
 #include <libvirt/libvirt.h>
 
-void create_domain(virConnectPtr conn);
+void create_domain(virConnectPtr conn, const char *name);
 
 void delete_domain(virConnectPtr conn, const char *name);
 

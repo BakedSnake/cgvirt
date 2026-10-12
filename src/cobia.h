@@ -131,46 +131,17 @@ typedef struct Channel {
 
 int argHandle(virConnectPtr conn, int argc, char* argv[]);
 
-virNetworkPtr *get_all_networks(virConnectPtr conn);
-
-virDomainPtr *get_all_domains(virConnectPtr conn);
-
-virDomainPtr get_domain(virConnectPtr conn, char *name);
-
-void show_domains(virConnectPtr conn);
-
-void show_vm_info(char *name, virConnectPtr conn);
-
-void show_networks(virConnectPtr conn);
-
-void start_domain(virConnectPtr conn, const char *name);
-
-void stop_domain(virConnectPtr conn, const char *name);
-
-void delete_domain(virConnectPtr conn, const char *name);
-
-void create_domain(virConnectPtr conn);
+void parse_yaml(const char *filepath);
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
   {"version",           no_argument,            0, 'v'},
-  {"create",            no_argument,            0, 'x'},
+  {"create",            required_argument,      0, 'c'},
   {"list",              required_argument,      0, 'l'},
   {"start",             required_argument,      0, 's'},
   {"stop",              required_argument,      0, 'q'},
-  {"delete",            required_argument,      0, 'X'},
-
+  {"delete",            required_argument,      0, 'D'},
   {"info",              required_argument,      0, 'i'},
-  {"arch",              required_argument,      0, 'a'},
-  {"boot",              required_argument,      0, 'b'},
-  {"cpu",               required_argument,      0, 'c'},
-  {"cd",                required_argument,      0, 'O'},
-  {"disk",              required_argument,      0, 'd'},
-  {"graphics",          required_argument,      0, 'g'},
-  {"memory",            required_argument,      0, 'r'},
-  {"model",             required_argument,      0, 'm'},
-  {"name",              required_argument,      0, 'n'},
-  {"net",               required_argument,      0, 'w'},
-  {"os",                required_argument,      0, 'o'},
+  {"parse",             required_argument,      0, 'p'},
   {0,                   0,                      0,  0 }
 };

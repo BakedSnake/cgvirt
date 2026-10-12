@@ -4,8 +4,9 @@
 #include "xml.h"
 #include "virt.h"
 
-void create_domain(virConnectPtr conn)
+void create_domain(virConnectPtr conn, const char *name)
 {
+    parse_yaml(name);
     xmlBufferPtr buf = xmlBufferCreate();
     if (!buf) return;
     const char* xml = get_domain_xml(buf);

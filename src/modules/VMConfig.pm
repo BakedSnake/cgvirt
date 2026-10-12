@@ -32,7 +32,9 @@ sub get_os_release {
 sub parse_config {
     $default_settings{arch}        = $cfg->[2]->{arch};
     $default_settings{boot}        = $cfg->[2]->{boot};
+    $default_settings{cd}          = $cfg->[2]->{cd};
     $default_settings{cpu}         = $cfg->[2]->{cpu};
+    $default_settings{disk}        = $cfg->[2]->{disk};
     $default_settings{graphics}    = $cfg->[2]->{graphics};
     $default_settings{model}       = $cfg->[2]->{model};
     $default_settings{net}         = $cfg->[2]->{net};

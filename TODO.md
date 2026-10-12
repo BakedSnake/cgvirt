@@ -14,7 +14,9 @@
 - [ ] Improve XML string creation
 - [ ] Add TUI
 - [ ] Implement management via yaml files
+  - [x] Parse yaml into xml and use it to create domain
+  - [x] YAML config file ( Perl )
+  - [x] Create domain yaml ( Perl )
   - [ ] XML validation
   - [ ] YAML validation
-  - [x] YAML config file ( Perl )
 

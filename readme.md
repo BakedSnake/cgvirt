@@ -5,6 +5,8 @@ Quickly whip up a Cloud OS virtual machine with qemu and libvirt.
 - qemu
 - libvirt
 - mkisofs (cdr-tools)
+- libxml2
+- libyaml
 - libwww-curl-perl
 - libyaml-tiny-perl
 

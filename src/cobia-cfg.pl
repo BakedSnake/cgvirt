@@ -164,7 +164,9 @@ sub write_vm_yaml {
     my @vm = (
         arch        => $VMConfig::default_settings{arch},
         boot        => $VMConfig::default_settings{boot},
+        cd          => "$vm_env/$VMConfig::default_settings{cd}",
         cpu         => $VMConfig::default_settings{cpu},
+        disk        => "$vm_env/$diskname",
         graphics    => $VMConfig::default_settings{graphics},
         model       => $VMConfig::default_settings{model},
         name        => $vm_name,
@@ -183,21 +185,13 @@ sub write_vm_yaml {
 
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
-    my $virt_str = "cobia -n $vm_name"
-    . " --arch $VMConfig::default_settings{arch}"
-    . " --cpu $VMConfig::default_settings{cpu}"
-    . " --disk $vm_env/$diskname"
-    . " --cd $vm_env/cidata.iso"
-    . " --net $VMConfig::default_settings{net}"
-    . " --model $VMConfig::default_settings{model}"
-    . " --graphics $VMConfig::default_settings{graphics}"
-    . " --memory $VMConfig::default_settings{ram}"
-    . " --create |";
-    
+    my $virt_str = "cobia -c $vm_env/$vm_name.yml |";
+
     open VIRT, $virt_str or die "$!";
     while (my $line= <VIRT>) {
         print(STDOUT "$line");
     }
+
     close VIRT;
 }
 

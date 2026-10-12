@@ -4,7 +4,7 @@ PERL_PREFIX=/usr/lib64/perl5/5.44
 PERL_INSTALL_DIR=$(PERL_PREFIX)/Cobia
 CC = clang
 CFLAGS = -std=c99 -Wall -Wextra -Wpedantic -Wunused-value -I/usr/include/libxml2
-LDFLAGS = -lvirt -lxml2
+LDFLAGS = -lvirt -lxml2 -lyaml
 SOURCES = src/cobia.c src/xml.c src/virt.c
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = cobia

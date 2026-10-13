@@ -6,7 +6,6 @@ use warnings;
 
 use YAML::Tiny;
 
-our %default_settings;
 our $username = $ENV{LOGNAME};
 our $config_file = "$ENV{HOME}/.config/cobia/cobia.yml";
 
@@ -16,6 +15,21 @@ our $vm_image_choice = 1;
 
 my $yaml = YAML::Tiny->read("$config_file");
 my $cfg = $yaml->[0];
+
+our %default_settings = (
+    arch => "x86_64",
+    boot => "uefi",
+    cd => "cidata.iso",
+    cpu => "2",
+    disk => "",
+    disksize => "40",
+    graphics => "spice",
+    hostname => "",
+    model => "virtio",
+    name => "",
+    net => "default",
+    ram => "2096",
+);
 
 sub get_os_release {
     my $os_release;
@@ -34,26 +48,14 @@ sub get_os_release {
 }
 
 sub parse_config {
-    $default_settings{arch}        = $cfg->[2]->{arch};
-    $default_settings{boot}        = $cfg->[2]->{boot};
-    $default_settings{cd}          = $cfg->[2]->{cd};
-    $default_settings{cpu}         = $cfg->[2]->{cpu};
-    $default_settings{disk}        = $cfg->[2]->{disk}->{name};
-    $default_settings{disksize}    = $cfg->[2]->{disk}->{size};
-    $default_settings{graphics}    = $cfg->[2]->{graphics};
-    $default_settings{hostname}    = $cfg->[2]->{hostname};
-    $default_settings{model}       = $cfg->[2]->{model};
-    $default_settings{name}        = $cfg->[2]->{vm}->{name};
-    $default_settings{net}         = $cfg->[2]->{net};
-    $default_settings{ram}         = $cfg->[2]->{ram};
     $default_settings{ssh_key}     = $cfg->[1]->{ssh_key};
     $default_settings{user}        = $cfg->[1]->{user};
     $default_settings{vm_dir}      = $cfg->[0]->{vm_dir};
 }
 
 sub get_os_images_urls {
-    my $imgs = $cfg->[3]->{images};
-    my $len = $cfg->[3]->{count};
+    my $imgs = $cfg->[2]->{images};
+    my $len = $cfg->[2]->{count};
 
     if ($len > 0) {
         for (my $i = 0; $i < $len; $i++) {

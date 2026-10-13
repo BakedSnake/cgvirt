@@ -26,20 +26,8 @@ sub select_image {
         print(STDOUT "\n  Select OS image: ");
         $VMConfig::vm_image_choice = <STDIN>;
         chomp $VMConfig::vm_image_choice;
-    } else { print(STDOUT "\n  Your choice: $VMConfig::vm_image_choice\n"); }
-
-    if ($VMConfig::vm_image_choice == "1") {
-        print(STDOUT "\n>>> Downloading: Debian Trixie\n\n  - $VMConfig::os_img_urls[1]\n\n");
-    } elsif ($VMConfig::vm_image_choice == "2") {
-        print(STDOUT "\n>>> Downloading: Gentoo ( arm64 )\n\n  - $VMConfig::os_img_urls[2]\n\n");
-    } elsif ($VMConfig::vm_image_choice == "3") {
-        print(STDOUT "\n>>> Downloading: Gentoo ( amd64 )\n\n  - $VMConfig::os_img_urls[3]\n\n");
-    } elsif ($VMConfig::vm_image_choice == "4") {
-        print(STDOUT "\n>>> Downloading: OpenSuse Leap 16\n\n  - $VMConfig::os_img_urls[4]\n\n");
-    } elsif ($VMConfig::vm_image_choice == "5") {
-        print(STDOUT "\n>>> Downloading: Ubuntu Noble\n\n  - $VMConfig::os_img_urls[5]\n\n");
     } else {
-        print(STDOUT "\n>>> Downloading: Ubuntu Focal\n\n  - $VMConfig::os_img_urls[6]\n\n");
+        print(STDOUT "\n  Your choice: $VMConfig::vm_image_choice\n\n");
     }
 }
 
@@ -61,7 +49,7 @@ sub get_disk_image {
     my $rc;
     if ($ret == 0) {
         $rc = $curl->getinfo(CURLINFO_HTTP_CODE);
-        print(STDOUT ">>> Transfer Ok!\n");
+        print(STDOUT "\n>>> Transfer Ok!\n");
         print(STDOUT ">>> Received response: $rc\n\n");
     
         open IMG, "> os_img.qcow2" or die "Could not open file: $!";

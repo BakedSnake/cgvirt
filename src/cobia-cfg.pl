@@ -67,14 +67,16 @@ sub configure {
     
     if ($VMConfig::vm_image_choice) {
         if ($VMConfig::vm_image_choice == 1) {
-            $vm_os = "debian13";
+            $vm_os = "alpine";
         } elsif ($VMConfig::vm_image_choice == 2) {
-            $vm_os = "gentoo";
+            $vm_os = "debian13";
         } elsif ($VMConfig::vm_image_choice == 3) {
             $vm_os = "gentoo";
         } elsif ($VMConfig::vm_image_choice == 4) {
-            $vm_os = "opensuse16.0";
+            $vm_os = "gentoo";
         } elsif ($VMConfig::vm_image_choice == 5) {
+            $vm_os = "opensuse16.0";
+        } elsif ($VMConfig::vm_image_choice == 6) {
             $vm_os = "ubuntu24.04";
         } else {
             $vm_os = "ubuntu20.04";
@@ -160,7 +162,7 @@ sub create_vm_disk {
 
 sub write_vm_yaml {
     $VMConfig::default_settings{cd} = "$vm_env/$VMConfig::default_settings{cd}";
-    $VMConfig::default_settings{disk} = "$vm_env/$VMConfig::default_settings{disk}";
+    $VMConfig::default_settings{disk} = "$vm_env/$VMConfig::default_settings{name}.qcow2";
     $VMConfig::default_settings{vm_dir} = "$vm_env";
 
     my @vm = (

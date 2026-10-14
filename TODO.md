@@ -11,6 +11,10 @@
   - [ ] Get network info
   - [ ] Create a network
   - [ ] Delete a network
+- [ ] Manage Storage
+  - [ ] Resize a disk
+  - [ ] Add storage
+  - [ ] Remove storage
 - [ ] Improve XML string creation
 - [ ] Add TUI
 - [ ] Implement management via yaml files

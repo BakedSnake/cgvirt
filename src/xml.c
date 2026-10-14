@@ -98,12 +98,12 @@ const char* get_domain_xml(xmlBufferPtr buf)
 
                 xmlTextWriterStartElement(w, BAD_CAST "video");
                     xmlTextWriterStartElement(w, BAD_CAST "model");
-                        xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "virtio");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST VIDEO_MDL);
                         xmlTextWriterWriteAttribute(w, BAD_CAST "heads", BAD_CAST "1");
                         xmlTextWriterWriteAttribute(w, BAD_CAST "primary", BAD_CAST "yes");
                     xmlTextWriterEndElement(w);
                     xmlTextWriterStartElement(w, BAD_CAST "driver");
-                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "qemu");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST VIDEO_DRV);
                     xmlTextWriterEndElement(w);
                 xmlTextWriterEndElement(w);
 

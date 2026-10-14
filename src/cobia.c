@@ -30,6 +30,8 @@ char *GRAPHICS          = NULL;
 char *SECBOOT           = NULL;
 char *SSHKEY            = NULL;
 char *USER              = NULL;
+char *VIDEO_DRV         = NULL;
+char *VIDEO_MDL         = NULL;
 char *VMDIR             = NULL;
 char NVRAM[256]         = { 0 };
 
@@ -41,6 +43,8 @@ key_map_t settings[]    = {
     { "domain.devices.disk.source",         &DISK     },
     { "domain.devices.graphics",            &GRAPHICS },
     { "domain.devices.net",                 &NET      },
+    { "domain.devices.video.driver",        &VIDEO_DRV},
+    { "domain.devices.video.model",         &VIDEO_MDL},
     { "domain.model",                       &MODEL    },
     { "domain.name",                        &NAME     },
     { "domain.os.arch",                     &ARCH     },

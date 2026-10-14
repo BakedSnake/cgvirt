@@ -20,6 +20,8 @@ extern char *NET;
 extern char *MODEL;
 extern char *GRAPHICS;
 extern char NVRAM[256];
+extern char *VIDEO_DRV;
+extern char *VIDEO_MDL;
 
 typedef struct {
     const char *key;

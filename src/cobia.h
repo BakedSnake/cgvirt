@@ -154,6 +154,6 @@ static struct option options[] = {
   {"stop",              required_argument,      0, 'q'},
   {"delete",            required_argument,      0, 'D'},
   {"info",              required_argument,      0, 'i'},
-  {"parse",             required_argument,      0, 'p'},
+  {"xml",               required_argument,      0, 'x'},
   {0,                   0,                      0,  0 }
 };

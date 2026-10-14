@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 int argHandle(virConnectPtr conn, int argc, char* argv[])
 {
     int opt;
-    const char * arg_str = "hvc:l:s:q:D:i:p:";
+    const char * arg_str = "hvc:l:s:q:D:i:p:x:";
     while ((opt = getopt_long(argc, argv, arg_str, options, NULL)) != -1) {
         switch (opt) {
             case 'h':
@@ -115,6 +115,9 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
                 fprintf(stdout, "%s\n", NVRAM);
                 delete_domain(conn, optarg);
                 break;
+            case 'x':
+                fprintf(stdout, "%s\n", get_domain_xml(conn, optarg));
+                return 0;
             case '?':
                 default:
                 break;

@@ -1,3 +1,4 @@
+#include <libvirt/libvirt.h>
 #include <string.h>
 
 #include "cobia.h"
@@ -9,7 +10,7 @@ void create_domain(virConnectPtr conn, const char *name)
     parse_yaml(name);
     xmlBufferPtr buf = xmlBufferCreate();
     if (!buf) return;
-    const char* xml = get_domain_xml(buf);
+    const char* xml = create_domain_xml(buf);
     printf("%s\n", xml);
     virDomainDefineXML(conn, xml);
     xmlBufferFree(buf);
@@ -64,7 +65,7 @@ virDomainPtr *get_all_domains(virConnectPtr conn)
     return NULL;
 }
 
-virDomainPtr get_domain(virConnectPtr conn, char *name)
+virDomainPtr get_domain(virConnectPtr conn, const char *name)
 {
     virDomainPtr *doms = get_all_domains(conn);
     if (doms != NULL) {
@@ -73,6 +74,16 @@ virDomainPtr get_domain(virConnectPtr conn, char *name)
                 return doms[i];
             }
         }
+    }
+
+    return NULL;
+}
+
+char *get_domain_xml(virConnectPtr conn, const char *name)
+{
+    virDomainPtr dom = get_domain(conn, name);
+    if (dom != NULL) {
+        return virDomainGetXMLDesc(dom, 0);
     }
 
     return NULL;
@@ -136,6 +147,19 @@ virNetworkPtr *get_all_networks(virConnectPtr conn)
     return NULL;
 }
 
+virNetworkPtr get_network(virConnectPtr conn, const char *name)
+{
+    virNetworkPtr *networks = get_all_networks(conn);
+    if (networks != NULL) {
+        for (int i = 0; i < TOTAL_NET_COUNT; ++i) {
+            if (networks[i] != NULL && strcmp(virNetworkGetName(networks[i]), name) == 0)
+                return networks[i];
+        }
+    }
+
+    return NULL;
+}
+
 void show_networks(virConnectPtr conn)
 {
     virNetworkPtr *networks = get_all_networks(conn);
@@ -147,4 +171,14 @@ void show_networks(virConnectPtr conn)
             }
         }
     }
+}
+
+char *get_network_xml(virConnectPtr conn, const char *name)
+{
+    virNetworkPtr net = get_network(conn, name);
+    if (net != NULL) {
+        return virNetworkGetXMLDesc(net, 0);
+    }
+
+    return NULL;
 }

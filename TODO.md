@@ -8,7 +8,7 @@
   - [x] Deliging a domain
 - [ ] Manage Networks
   - [x] List networks
-  - [ ] Get network info
+  - [x] Get network info
   - [ ] Create a network
   - [ ] Delete a network
 - [ ] Manage Storage

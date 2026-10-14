@@ -1,6 +1,10 @@
 #include <getopt.h>
 #include <libvirt/libvirt.h>
 
+#define KVSIZE 256
+#define MAXDEPTH 8
+#define MAXKEYS 256
+
 extern int TOTAL_VM_COUNT;
 extern int TOTAL_NET_COUNT;
 
@@ -155,5 +159,6 @@ static struct option options[] = {
   {"delete",            required_argument,      0, 'D'},
   {"info",              required_argument,      0, 'i'},
   {"xml",               required_argument,      0, 'x'},
+  {"netinfo",           required_argument,      0, 'n'},
   {0,                   0,                      0,  0 }
 };

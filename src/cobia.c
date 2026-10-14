@@ -6,10 +6,6 @@
 #include "xml.h"
 #include "virt.h"
 
-#define KVSIZE 256
-#define MAXDEPTH 8
-#define MAXKEYS 256
-
 int TOTAL_VM_COUNT      = 0;
 int TOTAL_NET_COUNT     = 0;
 
@@ -82,7 +78,7 @@ int main(int argc, char **argv) {
 int argHandle(virConnectPtr conn, int argc, char* argv[])
 {
     int opt;
-    const char * arg_str = "hvc:l:s:q:D:i:p:x:";
+    const char * arg_str = "hvc:l:s:q:D:i:p:x:n:";
     while ((opt = getopt_long(argc, argv, arg_str, options, NULL)) != -1) {
         switch (opt) {
             case 'h':
@@ -117,6 +113,9 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
                 break;
             case 'x':
                 fprintf(stdout, "%s\n", get_domain_xml(conn, optarg));
+                return 0;
+            case 'n':
+                show_network_info(conn, optarg);
                 return 0;
             case '?':
                 default:

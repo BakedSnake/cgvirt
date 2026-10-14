@@ -1,5 +1,6 @@
 #include <libvirt/libvirt.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "cobia.h"
 #include "xml.h"
@@ -178,6 +179,30 @@ char *get_network_xml(virConnectPtr conn, const char *name)
     virNetworkPtr net = get_network(conn, name);
     if (net != NULL) {
         return virNetworkGetXMLDesc(net, 0);
+    }
+
+    return NULL;
+}
+
+char *show_network_info(virConnectPtr conn, const char *name)
+{
+    char *netxml = get_network_xml(conn, name);
+    if (netxml != NULL) {
+        xmlDocPtr doc = xmlReadMemory(netxml, strlen(netxml), "n.xml", NULL, XML_PARSE_RECOVER | XML_PARSE_NOBLANKS);
+        if (doc == NULL) {
+            fprintf(stderr, "Failed to parse network xml\n");
+            return NULL;
+        }
+
+        fprintf(stdout, "Network Info:\n");
+        fprintf(stdout, "  Name: %s\n  UUID: %s\n  Bridge Name: %s\n  Mode: %s\n  IP: %s\n  DHCP Range: %s - %s\n",
+                xpath_get(doc, "/network/name"),
+                xpath_get(doc, "/network/uuid"),
+                xpath_get(doc, "/network/bridge/@name"),
+                xpath_get(doc, "/network/forward/@mode"),
+                xpath_get(doc, "/network/ip/@address"),
+                xpath_get(doc, "/network/ip/dhcp/range/@start"),
+                xpath_get(doc, "/network/ip/dhcp/range/@end"));
     }
 
     return NULL;

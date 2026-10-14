@@ -95,17 +95,17 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
                 if (strcmp(optarg, "networks") == 0) {
                     show_networks(conn);
                 }
-                return 0;
+                break;
             case 'i':
                 fprintf(stdout, "%s:\n", optarg);
                 show_vm_info(optarg, conn);
-                return 0;
+                break;
             case 's':
                 start_domain(conn, optarg);
-                return 0;
+                break;
             case 'q':
                 stop_domain(conn, optarg);
-                return 0;
+                break;
             case 'D':
                 get_nvram_path(optarg);
                 fprintf(stdout, "%s\n", NVRAM);
@@ -113,10 +113,10 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
                 break;
             case 'x':
                 fprintf(stdout, "%s\n", get_domain_xml(conn, optarg));
-                return 0;
+                break;
             case 'n':
                 show_network_info(conn, optarg);
-                return 0;
+                break;
             case '?':
                 default:
                 break;

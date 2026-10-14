@@ -64,9 +64,9 @@ sub get_os_images_urls {
     my $len = $cfg->[2]->{count};
 
     if ($len > 0) {
-        for (my $i = 0; $i < $len; $i++) {
-            $os_img_urls[$i+1] = $imgs->[$i]->{url};
-            $os_img_names[$i+1] = $imgs->[$i]->{name};
+        for (my $i = 1; $i <= $len; $i++) {
+            $os_img_urls[$i] = $imgs->[$i-1]->{url};
+            $os_img_names[$i] = $imgs->[$i-1]->{name};
         }
     }
 }

@@ -130,7 +130,7 @@ sub configure {
     }
 
     ## Select Cloud image OS
-    $VMConfig::vm_image_choice = IMGDownload::select_image($interactive);
+    IMGDownload::select_image($interactive);
 }
 
 sub create_vm_disk {

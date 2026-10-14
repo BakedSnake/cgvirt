@@ -7,6 +7,8 @@
 #include "virt.h"
 
 #define KVSIZE 256
+#define MAXDEPTH 8
+#define MAXKEYS 256
 
 int TOTAL_VM_COUNT      = 0;
 int TOTAL_NET_COUNT     = 0;
@@ -14,32 +16,42 @@ int TOTAL_NET_COUNT     = 0;
 char *NAME              = NULL;
 char *ARCH              = NULL;
 char *BOOT              = NULL;
+char *BOOTDEV           = NULL;
 char *CPU               = NULL;
 char *CD                = NULL;
 char *DISK              = NULL;
+char *DISKSIZE          = NULL;
+char *EFI               = NULL;
+char *MACHINE           = NULL;
 char *MEMORY            = NULL;
 char *NET               = NULL;
 char *MODEL             = NULL;
 char *GRAPHICS          = NULL;
+char *SECBOOT           = NULL;
 char *SSHKEY            = NULL;
 char *USER              = NULL;
 char *VMDIR             = NULL;
 char NVRAM[256]         = { 0 };
 
 key_map_t settings[]    = {
-    { "arch",     &ARCH     },
-    { "boot",     &BOOT     },
-    { "cd",       &CD       },
-    { "cpu",      &CPU      },
-    { "disk",     &DISK     },
-    { "graphics", &GRAPHICS },
-    { "model",    &MODEL    },
-    { "name",     &NAME     },
-    { "net",      &NET      },
-    { "ram",      &MEMORY   },
-    { "ssh_key",  &SSHKEY   },
-    { "user",     &USER     },
-    { "vm_dir",   &VMDIR    },
+    { "domain.boot",                        &BOOT     },
+    { "domain.cd",                          &CD       },
+    { "domain.cpu",                         &CPU      },
+    { "domain.disk.size",                   &DISKSIZE },
+    { "domain.disk.source",                 &DISK     },
+    { "domain.graphics",                    &GRAPHICS },
+    { "domain.model",                       &MODEL    },
+    { "domain.name",                        &NAME     },
+    { "domain.net",                         &NET      },
+    { "domain.os.arch",                     &ARCH     },
+    { "domain.os.bootdev",                  &BOOTDEV  },
+    { "domain.os.efi",                      &EFI      },
+    { "domain.os.features.secure_boot",     &SECBOOT  },
+    { "domain.os.machine",                  &MACHINE  },
+    { "domain.ram",                         &MEMORY   },
+    { "domain.ssh_key",                     &SSHKEY   },
+    { "domain.user",                        &USER     },
+    { "domain.vm_dir",                      &VMDIR    },
 };
 
 int main(int argc, char **argv) {
@@ -110,9 +122,11 @@ int argHandle(virConnectPtr conn, int argc, char* argv[])
 
 void parse_yaml(const char *filepath)
 {
-    int mapping, key_count = 0;
-    char current_key[KVSIZE] = {0};
-    char keys[KVSIZE][KVSIZE], values[KVSIZE][KVSIZE];
+    int depth = 0;
+    int key_count = 0;
+    char keybuf[MAXDEPTH][KVSIZE] = {0};
+    char keys[MAXKEYS][KVSIZE] = {0};
+    char values[MAXKEYS][KVSIZE] = {0};
 
     FILE *fp = fopen(filepath, "rb");
     yaml_parser_t parser;
@@ -129,24 +143,36 @@ void parse_yaml(const char *filepath)
         if (!yaml_parser_parse(&parser, &event))
             break;
 
-        if (event.type == YAML_MAPPING_START_EVENT)
-            mapping = 1;
+        if (event.type == YAML_MAPPING_START_EVENT) {
+            ++depth;
+        }
 
-        if (event.type == YAML_MAPPING_END_EVENT)
-            mapping = 0;
+        if (event.type == YAML_MAPPING_END_EVENT) {
+            --depth;
+            if (depth > 0) keybuf[depth - 1][0] = '\0';
+        }
 
         if (event.type == YAML_SCALAR_EVENT) {
             char *value = (char *)event.data.scalar.value;
             int len = event.data.scalar.length;
-            if (mapping && current_key[0] == '\0') {
-                if (strcmp(value, "domain") != 0) {
-                    snprintf(current_key, sizeof(current_key), "%.*s", len, value);
-                    snprintf(keys[key_count], sizeof(current_key), "%.*s", len, value);
+
+            if (depth > 0  && keybuf[depth - 1][0] == '\0') {
+                snprintf(keybuf[depth - 1], KVSIZE, "%.*s", len, value);
+
+                char path[KVSIZE * MAXDEPTH] = {0};
+                for (int d = 0; d < depth; ++d) {
+                    if (d > 0) strncat(path, ".", sizeof(path) - strlen(path) - 1);
+                    strncat(path, keybuf[d], sizeof(path) - strlen(path) - 1);
+                }
+                snprintf(keys[key_count], KVSIZE, "%s", path);
+            } else {
+                if (key_count < MAXKEYS) {
+                    snprintf(values[key_count], KVSIZE, "%.*s", len, value);
                     ++key_count;
                 }
-            } else {
-                snprintf(values[key_count-1], sizeof(current_key), "%.*s", len, value);
-                current_key[0] = '\0';
+
+                if (depth > 0)
+                    keybuf[depth - 1][0] = '\0';
             }
         }
 
@@ -167,5 +193,6 @@ void parse_yaml(const char *filepath)
         }
 
         fprintf(stdout, "%s: %s\n", settings[i].key, *settings[i].dest);
+        //fprintf(stdout, "%s: %s\n", keys[i], values[i]);
     }
 }

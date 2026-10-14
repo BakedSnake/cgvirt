@@ -1,90 +1,12 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "cobia.h"
 #include "xml.h"
 
-void get_mem_xml(xmlTextWriterPtr w)
-{
-    xmlTextWriterStartElement(w, BAD_CAST "memory");
-        xmlTextWriterWriteAttribute(w, BAD_CAST "unit", BAD_CAST "MiB");
-        xmlTextWriterWriteString(w, BAD_CAST MEMORY);
-    xmlTextWriterEndElement(w);
-}
-
-void get_vcpu_xml(xmlTextWriterPtr w)
-{
-    xmlTextWriterStartElement(w, BAD_CAST "vcpu");
-        xmlTextWriterWriteAttribute(w, BAD_CAST "placement", BAD_CAST "static");
-        xmlTextWriterWriteString(w, BAD_CAST CPU);
-    xmlTextWriterEndElement(w);
-}
-
 void get_nvram_path(const char *name)
 {
     snprintf(NVRAM, 256, "/var/lib/libvirt/qemu/nvram/%s_VARS.qcow2", name);
-}
-
-void get_firmware_xml(xmlTextWriterPtr w)
-{
-    xmlTextWriterStartElement(w, BAD_CAST "os");
-        xmlTextWriterWriteAttribute(w, BAD_CAST "firmware", BAD_CAST "efi");
-        xmlTextWriterStartElement(w, BAD_CAST "firmware");
-            xmlTextWriterStartElement(w, BAD_CAST "feature");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "enabled", BAD_CAST "yes");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "enrolled-keys");
-            xmlTextWriterEndElement(w);
-            xmlTextWriterStartElement(w, BAD_CAST "feature");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "enabled", BAD_CAST "yes");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "secure-boot");
-            xmlTextWriterEndElement(w);
-            xmlTextWriterStartElement(w, BAD_CAST "loader");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "readonly", BAD_CAST "yes");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "pflash");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
-                xmlTextWriterWriteString(w, BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.qcow2");
-            xmlTextWriterEndElement(w);
-            xmlTextWriterStartElement(w, BAD_CAST "nvram");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "template", BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.qcow2");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "templateFormat", BAD_CAST "qcow2");
-                xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
-                xmlTextWriterWriteString(w, BAD_CAST NVRAM);
-            xmlTextWriterEndElement(w);
-        xmlTextWriterEndElement(w);
-
-        xmlTextWriterStartElement(w, BAD_CAST "type");
-            xmlTextWriterWriteAttribute(w, BAD_CAST "arch", BAD_CAST ARCH);
-            xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST "q35");
-            xmlTextWriterWriteString(w, BAD_CAST "hvm");
-        xmlTextWriterEndElement(w);
-        xmlTextWriterStartElement(w, BAD_CAST "boot");
-            xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST "hd");
-        xmlTextWriterEndElement(w);
-    xmlTextWriterEndElement(w);
-}
-
-void get_features_xml(xmlTextWriterPtr w)
-{
-    xmlTextWriterStartElement(w, BAD_CAST "features");
-        xmlTextWriterStartElement(w, BAD_CAST "acpi");
-        xmlTextWriterEndElement(w);
-        xmlTextWriterStartElement(w, BAD_CAST "apic");
-        xmlTextWriterEndElement(w);
-        xmlTextWriterStartElement(w, BAD_CAST "vmport");
-            xmlTextWriterWriteAttribute(w, BAD_CAST "state", BAD_CAST "off");
-        xmlTextWriterEndElement(w);
-        xmlTextWriterStartElement(w, BAD_CAST "smm");
-            xmlTextWriterWriteAttribute(w, BAD_CAST "state", BAD_CAST "on");
-        xmlTextWriterEndElement(w);
-    xmlTextWriterEndElement(w);
-}
-
-void get_cpu_conf_xml(xmlTextWriterPtr w)
-{
-    xmlTextWriterStartElement(w, BAD_CAST "cpu");
-        xmlTextWriterWriteAttribute(w, BAD_CAST "mode", BAD_CAST "host-passthrough");
-        xmlTextWriterWriteAttribute(w, BAD_CAST "check", BAD_CAST "none");
-        xmlTextWriterWriteAttribute(w, BAD_CAST "migratable", BAD_CAST "on");
-    xmlTextWriterEndElement(w);
 }
 
 const char* get_domain_xml(xmlBufferPtr buf)
@@ -100,11 +22,75 @@ const char* get_domain_xml(xmlBufferPtr buf)
             xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "kvm");
             xmlTextWriterWriteElement(w, BAD_CAST "name", BAD_CAST NAME);
 
-            get_mem_xml(w);
-            get_vcpu_xml(w);
-            get_firmware_xml(w);
-            get_features_xml(w);
-            get_cpu_conf_xml(w);
+            xmlTextWriterStartElement(w, BAD_CAST "memory");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "unit", BAD_CAST "MiB");
+                xmlTextWriterWriteString(w, BAD_CAST MEMORY);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "vcpu");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "placement", BAD_CAST "static");
+                xmlTextWriterWriteString(w, BAD_CAST CPU);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "os");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "firmware", BAD_CAST "efi");
+                xmlTextWriterStartElement(w, BAD_CAST "firmware");
+                    xmlTextWriterStartElement(w, BAD_CAST "feature");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "enabled", BAD_CAST SECBOOT);
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "enrolled-keys");
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "feature");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "enabled", BAD_CAST SECBOOT);
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "name", BAD_CAST "secure-boot");
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "loader");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "readonly", BAD_CAST "yes");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "type", BAD_CAST "pflash");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
+                        if (strcmp(SECBOOT, "yes") == 0)
+                            xmlTextWriterWriteString(w, BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_CODE.secboot.qcow2");
+                        else
+                            xmlTextWriterWriteString(w, BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_CODE.qcow2");
+                    xmlTextWriterEndElement(w);
+                    xmlTextWriterStartElement(w, BAD_CAST "nvram");
+                        if (strcmp(SECBOOT, "yes") == 0)
+                            xmlTextWriterWriteAttribute(w, BAD_CAST "template", BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_VARS.secboot.qcow2");
+                        else
+                            xmlTextWriterWriteAttribute(w, BAD_CAST "template", BAD_CAST "/usr/share/edk2/OvmfX64/OVMF_VARS.qcow2");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "templateFormat", BAD_CAST "qcow2");
+                        xmlTextWriterWriteAttribute(w, BAD_CAST "format", BAD_CAST "qcow2");
+                        xmlTextWriterWriteString(w, BAD_CAST NVRAM);
+                    xmlTextWriterEndElement(w);
+                xmlTextWriterEndElement(w);
+
+                xmlTextWriterStartElement(w, BAD_CAST "type");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "arch", BAD_CAST ARCH);
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "machine", BAD_CAST MACHINE);
+                    xmlTextWriterWriteString(w, BAD_CAST "hvm");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "boot");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "dev", BAD_CAST BOOTDEV);
+                xmlTextWriterEndElement(w);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "features");
+                xmlTextWriterStartElement(w, BAD_CAST "acpi");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "apic");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "vmport");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "state", BAD_CAST "off");
+                xmlTextWriterEndElement(w);
+                xmlTextWriterStartElement(w, BAD_CAST "smm");
+                    xmlTextWriterWriteAttribute(w, BAD_CAST "state", BAD_CAST "on");
+                xmlTextWriterEndElement(w);
+            xmlTextWriterEndElement(w);
+
+            xmlTextWriterStartElement(w, BAD_CAST "cpu");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "mode", BAD_CAST "host-passthrough");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "check", BAD_CAST "none");
+                xmlTextWriterWriteAttribute(w, BAD_CAST "migratable", BAD_CAST "on");
+            xmlTextWriterEndElement(w);
 
             xmlTextWriterStartElement(w, BAD_CAST "devices");
 

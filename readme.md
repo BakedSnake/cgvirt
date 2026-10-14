@@ -1,4 +1,4 @@
-### CG's Virtual Machine Manager / Installer
+### Cobia :: Virtual Machine Manager
 Quickly whip up a Cloud OS virtual machine with qemu and libvirt.
 
 #### Dependencies

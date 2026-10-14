@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "cobia.h"
 #include "xml.h"
@@ -7,6 +8,25 @@
 void get_nvram_path(const char *name)
 {
     snprintf(NVRAM, 256, "/var/lib/libvirt/qemu/nvram/%s_VARS.qcow2", name);
+}
+
+char *xpath_get(xmlDocPtr doc, const char *path)
+{
+    char *result = (char *)malloc(256);
+    xmlXPathContext *ctx = xmlXPathNewContext(doc);
+    xmlXPathObject *obj = xmlXPathEvalExpression((const xmlChar*)path, ctx);
+
+    if (obj && obj->nodesetval && obj->nodesetval->nodeNr > 0) {
+        xmlChar *s = xmlNodeGetContent(obj->nodesetval->nodeTab[0]);
+        if (s) {
+            strcpy(result, (char *)s);
+            xmlFree(s);
+        }
+    }
+
+    xmlXPathFreeObject(obj);
+    xmlXPathFreeContext(ctx);
+    return result;
 }
 
 const char* create_domain_xml(xmlBufferPtr buf)

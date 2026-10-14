@@ -9,7 +9,7 @@ void get_nvram_path(const char *name)
     snprintf(NVRAM, 256, "/var/lib/libvirt/qemu/nvram/%s_VARS.qcow2", name);
 }
 
-const char* get_domain_xml(xmlBufferPtr buf)
+const char* create_domain_xml(xmlBufferPtr buf)
 {
     xmlTextWriterPtr w = xmlNewTextWriterMemory(buf, 0);
     if (!w) {

@@ -88,13 +88,13 @@ sub configure {
 
     if ($interactive) {
         print(STDOUT "\nVM Name: ");
-        $VMConfig::default_settings{name} = <STDIN>;
-        chomp $VMConfig::default_settings{name};
+        $VMConfig::domain_settings{name} = <STDIN>;
+        chomp $VMConfig::domain_settings{name};
         print(STDOUT "\nVM Hostname: ");
-        $VMConfig::default_settings{hostname} = <STDIN>;
-        chomp $VMConfig::default_settings{hostname};
+        $VMConfig::domain_settings{hostname} = <STDIN>;
+        chomp $VMConfig::domain_settings{hostname};
     } else {
-        if ($VMConfig::default_settings{name} eq "") {
+        if ($VMConfig::domain_settings{name} eq "") {
             my $date;
             open DATE, "date -u +%s |" or die "$!";
             while (my $line = <DATE>) {
@@ -102,15 +102,15 @@ sub configure {
             }
 
             chomp $date;
-            $VMConfig::default_settings{name} = "$vm_os"."-$date";
+            $VMConfig::domain_settings{name} = "$vm_os"."-$date";
             close DATE;
         }
 
-        $VMConfig::default_settings{hostname} = $VMConfig::default_settings{name};
+        $VMConfig::domain_settings{hostname} = $VMConfig::domain_settings{name};
     }
     
     ## Create VM env
-    $vm_env = "$VMConfig::default_settings{vm_dir}/$VMConfig::default_settings{name}";
+    $vm_env = "$VMConfig::domain_settings{vm_dir}/$VMConfig::domain_settings{name}";
     my @vm_path = make_path("$vm_env", {
         verbose => 0,
         mode => 0777,
@@ -123,8 +123,8 @@ sub configure {
     ## Display Configuration
     if ($debug) {
         print(STDOUT ">>> Using the following configuration:\n");
-        print(STDOUT "  name => $VMConfig::default_settings{name}\n");
-        while (my ($key, $val) = each %VMConfig::default_settings) {
+        print(STDOUT "  name => $VMConfig::domain_settings{name}\n");
+        while (my ($key, $val) = each %VMConfig::domain_settings) {
             print(STDOUT "  $key => $val\n");
         }
     }
@@ -134,8 +134,8 @@ sub configure {
 }
 
 sub create_vm_disk {
-    my $diskname = "$VMConfig::default_settings{name}.qcow2";
-    my $disksize = $VMConfig::default_settings{disksize};
+    my $diskname = "$VMConfig::domain_settings{name}.qcow2";
+    my $disksize = $VMConfig::domain_settings{disksize};
     print(STDOUT ">>> Enter Disk Size ( in GBs ): ");
     if ($interactive or $disksize eq "") {
         $disksize = <STDIN>;
@@ -161,35 +161,47 @@ sub create_vm_disk {
 }
 
 sub write_vm_yaml {
-    $VMConfig::default_settings{cd} = "$vm_env/$VMConfig::default_settings{cd}";
-    $VMConfig::default_settings{disk} = "$vm_env/$VMConfig::default_settings{name}.qcow2";
-    $VMConfig::default_settings{vm_dir} = "$vm_env";
+    $VMConfig::domain_settings{cd} = "$vm_env/$VMConfig::domain_settings{cd}";
+    $VMConfig::domain_settings{disk} = "$vm_env/$VMConfig::domain_settings{name}.qcow2";
+    $VMConfig::domain_settings{vm_dir} = "$vm_env";
 
     my @vm = (
-        arch        => $VMConfig::default_settings{arch},
-        boot        => $VMConfig::default_settings{boot},
-        cd          => $VMConfig::default_settings{cd},
-        cpu         => $VMConfig::default_settings{cpu},
-        disk        => $VMConfig::default_settings{disk},
-        graphics    => $VMConfig::default_settings{graphics},
-        model       => $VMConfig::default_settings{model},
-        name        => $VMConfig::default_settings{name},
-        net         => $VMConfig::default_settings{net},
-        ram         => $VMConfig::default_settings{ram},
-        ssh_key     => $VMConfig::default_settings{ssh_key},
-        user        => $VMConfig::default_settings{user},
-        vm_dir      => $VMConfig::default_settings{vm_dir}
+        os          => {
+            efi         => "false",
+            arch        => $VMConfig::domain_settings{arch},
+            machine     => $VMConfig::domain_settings{machine},
+            features    => {
+                secure_boot => $VMConfig::domain_settings{secboot},
+            },
+            bootdev     => $VMConfig::domain_settings{bootdev},
+
+        },
+        boot        => $VMConfig::domain_settings{boot},
+        cd          => $VMConfig::domain_settings{cd},
+        cpu         => $VMConfig::domain_settings{cpu},
+        disk        => {
+            source  => $VMConfig::domain_settings{disk},
+            size    => $VMConfig::domain_settings{disksize}
+        },
+        graphics    => $VMConfig::domain_settings{graphics},
+        model       => $VMConfig::domain_settings{model},
+        name        => $VMConfig::domain_settings{name},
+        net         => $VMConfig::domain_settings{net},
+        ram         => $VMConfig::domain_settings{ram},
+        ssh_key     => $VMConfig::domain_settings{ssh_key},
+        user        => $VMConfig::domain_settings{user},
+        vm_dir      => $VMConfig::domain_settings{vm_dir}
     );
 
     my $vm_yaml = YAML::Tiny->new;
     $vm_yaml->[0]->{domain} = { @vm };
-    my $filename = "$VMConfig::default_settings{name}".".yml";
+    my $filename = "$VMConfig::domain_settings{name}".".yml";
     $vm_yaml->write( $filename );
 }
 
 sub create_virtual_machine {
     print(STDOUT "\n>>> Installing virtual machine.\n");
-    my $virt_str = "cobia -c $vm_env/$VMConfig::default_settings{name}.yml |";
+    my $virt_str = "cobia -c $vm_env/$VMConfig::domain_settings{name}.yml |";
 
     open VIRT, $virt_str or die "$!";
     while (my $line= <VIRT>) {
@@ -204,7 +216,7 @@ sub get_ip_address {
     my $found = 0;
     while (!$found) {
         sleep 5;
-        open IP, "cobia -i $VMConfig::default_settings{name} |" or die "$!";
+        open IP, "cobia -i $VMConfig::domain_settings{name} |" or die "$!";
         while (my $line = <IP>) {
             if ($line =~ m/IP/) {
                 print(STDOUT "$line\n");
@@ -228,7 +240,7 @@ sub main {
     
     ## Cloud Init Config
     $ssh_key = CloudInit::get_pubkey();
-    CloudInit::configure($username,$VMConfig::default_settings{hostname},$ssh_key);
+    CloudInit::configure($username,$VMConfig::domain_settings{hostname},$ssh_key);
     CloudInit::create_cidata();
 
     ## Create VM
@@ -247,19 +259,22 @@ sub main {
 
 prepare();
 GetOptions(
-    "arch=s"        => \$VMConfig::default_settings{arch},
-    "boot=s"        => \$VMConfig::default_settings{boot},
-    "cpu=s"         => \$VMConfig::default_settings{cpu},
-    "graphics=s"    => \$VMConfig::default_settings{graphics},
-    "hostname=s"    => \$VMConfig::default_settings{hostname},
-    "model=s"       => \$VMConfig::default_settings{model},
-    "name=s"        => \$VMConfig::default_settings{name},
-    "net=s"         => \$VMConfig::default_settings{net},
+    "arch=s"        => \$VMConfig::domain_settings{arch},
+    "boot=s"        => \$VMConfig::domain_settings{boot},
+    "bootdev=s"     => \$VMConfig::domain_settings{bootdev},
+    "cpu=s"         => \$VMConfig::domain_settings{cpu},
+    "graphics=s"    => \$VMConfig::domain_settings{graphics},
+    "hostname=s"    => \$VMConfig::domain_settings{hostname},
+    "machine=s"     => \$VMConfig::domain_settings{machine},
+    "model=s"       => \$VMConfig::domain_settings{model},
+    "name=s"        => \$VMConfig::domain_settings{name},
+    "net=s"         => \$VMConfig::domain_settings{net},
     "os=s"          => \$VMConfig::vm_image_choice,
-    "ram=s"         => \$VMConfig::default_settings{ram},
-    "size=s"        => \$VMConfig::default_settings{disksize},
-    "sshkey=s"      => \$VMConfig::default_settings{ssh_key},
-    "username=s"    => \$VMConfig::default_settings{user},
+    "ram=s"         => \$VMConfig::domain_settings{ram},
+    "secboot=s"     => \$VMConfig::domain_settings{secboot},
+    "size=s"        => \$VMConfig::domain_settings{disksize},
+    "sshkey=s"      => \$VMConfig::domain_settings{ssh_key},
+    "username=s"    => \$VMConfig::domain_settings{user},
 
     "create"        => \$create,
     "debug"         => \$debug,

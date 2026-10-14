@@ -16,19 +16,23 @@ our $vm_image_choice = 1;
 my $yaml = YAML::Tiny->read("$config_file");
 my $cfg = $yaml->[0];
 
-our %default_settings = (
+our %domain_settings = (
     arch => "x86_64",
     boot => "uefi",
+    bootdev => "hd",
     cd => "cidata.iso",
     cpu => "2",
     disk => "",
     disksize => "40",
+    efi => "false",
     graphics => "spice",
     hostname => "",
+    machine => "q35",
     model => "virtio",
     name => "",
     net => "default",
     ram => "2096",
+    secboot => "no",
 );
 
 sub get_os_release {
@@ -48,9 +52,9 @@ sub get_os_release {
 }
 
 sub parse_config {
-    $default_settings{ssh_key}     = $cfg->[1]->{ssh_key};
-    $default_settings{user}        = $cfg->[1]->{user};
-    $default_settings{vm_dir}      = $cfg->[0]->{vm_dir};
+    $domain_settings{ssh_key}     = $cfg->[1]->{ssh_key};
+    $domain_settings{user}        = $cfg->[1]->{user};
+    $domain_settings{vm_dir}      = $cfg->[0]->{vm_dir};
 }
 
 sub get_os_images_urls {

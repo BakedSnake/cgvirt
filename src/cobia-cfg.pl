@@ -177,16 +177,18 @@ sub write_vm_yaml {
 
         },
         boot        => $VMConfig::domain_settings{boot},
-        cd          => $VMConfig::domain_settings{cd},
         cpu         => $VMConfig::domain_settings{cpu},
-        disk        => {
-            source  => $VMConfig::domain_settings{disk},
-            size    => $VMConfig::domain_settings{disksize}
+        devices     => {
+            cd      => $VMConfig::domain_settings{cd},
+            disk    => {
+                source  => $VMConfig::domain_settings{disk},
+                size    => $VMConfig::domain_settings{disksize}
+            },
+            graphics=> $VMConfig::domain_settings{graphics},
+            net     => $VMConfig::domain_settings{net},
         },
-        graphics    => $VMConfig::domain_settings{graphics},
         model       => $VMConfig::domain_settings{model},
         name        => $VMConfig::domain_settings{name},
-        net         => $VMConfig::domain_settings{net},
         ram         => $VMConfig::domain_settings{ram},
         ssh_key     => $VMConfig::domain_settings{ssh_key},
         user        => $VMConfig::domain_settings{user},

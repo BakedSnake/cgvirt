@@ -186,6 +186,10 @@ sub write_vm_yaml {
             },
             graphics=> $VMConfig::domain_settings{graphics},
             net     => $VMConfig::domain_settings{net},
+            video   => {
+                driver => $VMConfig::domain_settings{video_driver},
+                model => $VMConfig::domain_settings{video_model},
+            },
         },
         model       => $VMConfig::domain_settings{model},
         name        => $VMConfig::domain_settings{name},
@@ -277,6 +281,8 @@ GetOptions(
     "size=s"        => \$VMConfig::domain_settings{disksize},
     "sshkey=s"      => \$VMConfig::domain_settings{ssh_key},
     "username=s"    => \$VMConfig::domain_settings{user},
+    "video-driver=s"=> \$VMConfig::domain_settings{video_driver},
+    "video-model=s" => \$VMConfig::domain_settings{video_model},
 
     "create"        => \$create,
     "debug"         => \$debug,

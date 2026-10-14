@@ -33,6 +33,8 @@ our %domain_settings = (
     net => "default",
     ram => "2096",
     secboot => "no",
+    video_driver => "qemu",
+    video_model => "virtio",
 );
 
 sub get_os_release {

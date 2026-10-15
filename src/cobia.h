@@ -145,9 +145,7 @@ typedef struct Channel {
     char *alias_name;
 } Channel;
 
-int argHandle(virConnectPtr conn, int argc, char* argv[]);
-
-void parse_yaml(const char *filepath);
+extern key_map_t settings[20];
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
@@ -162,3 +160,5 @@ static struct option options[] = {
   {"netinfo",           required_argument,      0, 'n'},
   {0,                   0,                      0,  0 }
 };
+
+int argHandle(virConnectPtr conn, int argc, char* argv[]);

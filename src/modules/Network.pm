@@ -4,7 +4,7 @@ package Network;
 use strict;
 use warnings;
 
-my $host_iface;
+our $host_iface;
 
 my $dosu = VMConfig::get_sudo();
 sub iptables_rules_present {
@@ -41,7 +41,7 @@ sub accept_forwarding {
 sub setup_postrouting {
     # for now using default qemu network
     open POST, "$dosu iptables -t nat -A POSTROUTING -s 192.168.122.0/24 -o $host_iface -j MASQUERADE |" or die "$!";
-    while (my $line = <FORWARD>) {
+    while (my $line = <POST>) {
         print(STDOUT "$line");
     }
 

@@ -291,6 +291,7 @@ GetOptions(
     "apply"         => \$apply,
 
     "interactive=s" => \$interactive,
+    "iface=s"       => \$Network::host_iface,
 );
 
 if ($apply or $create or $netconf) {
